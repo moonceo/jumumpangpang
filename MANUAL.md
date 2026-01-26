@@ -39,6 +39,20 @@ pnpm install
 bun install
 ```
 
+### 2.3 환경변수 설정
+환경변수 템플릿을 복사하여 로컬 설정 파일을 만듭니다.
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` 파일을 열어 필요한 값을 입력하세요:
+
+| 변수명 | 설명 |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | 백엔드 API 서버 주소 |
+| `NEXT_PUBLIC_ENV` | 환경 설정 (development/staging/production) |
+
 ## 3. 개발 서버 실행 (Development)
 
 설치가 완료되면 개발 서버를 실행하여 로컬에서 결과물을 확인할 수 있습니다.
@@ -67,14 +81,15 @@ npm run dev
 .
 ├── app/                # Next.js App Router 페이지 및 레이아웃
 ├── components/         # 재사용 가능한 UI 컴포넌트
-│   ├── ui/             # Shadcn UI 기본 컴포넌트 (버튼, 카드 등)
-│   └── ...             # 기타 커스텀 컴포넌트
-├── lib/                # 유틸리티 함수 및 설정 (utils.ts 등)
+│   └── ui/             # Shadcn UI 기본 컴포넌트
+├── docs/               # 기획서 및 개발 문서
+├── hooks/              # 커스텀 React Hooks
+├── lib/                # 유틸리티 함수 및 설정
 ├── public/             # 이미지, 폰트 등 정적 파일
-├── styles/             # 전역 스타일 (globals.css 등)
+├── types/              # TypeScript 타입 정의
+├── .env.example        # 환경변수 템플릿
 ├── next.config.ts      # Next.js 설정 파일
-├── tailwind.config.ts  # Tailwind CSS 설정 파일
-└── package.json        # 프로젝트 의존성 및 스크립트 정보
+└── package.json        # 프로젝트 의존성 및 스크립트
 ```
 
 ## 6. 트러블슈팅 (Troubleshooting)
