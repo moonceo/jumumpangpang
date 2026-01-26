@@ -69,3 +69,4 @@ npm run dev
 Private
 # jimunpangpang
 # jumumpangpang
+# jumumpangpang
