@@ -8,24 +8,31 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Order } from "@/types/order";
-import { Truck } from "lucide-react";
+import { Truck, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { PcccInfoModal } from "@/components/orders/modals/pccc-info-modal";
 import { OrderSearch } from "@/components/orders/shared/order-search";
+import { ORDER_STATUSES } from "@/lib/constants/orders";
+
+import { WarehouseModal } from "@/components/orders/modals/warehouse-modal";
+import { SourcingManagementModal } from "@/components/orders/modals/sourcing-management-modal";
+import { OrderHistoryModal } from "@/components/orders/modals/order-history-modal";
+import { AddSourcingModal } from "@/components/orders/modals/add-sourcing-modal";
+
+import { DomesticTrackingConfirmModal } from "@/components/orders/modals/domestic-tracking-confirm-modal";
 
 export default function ShippingPage() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [trackingModalOpen, setTrackingModalOpen] = useState(false);
     const [pcccModalOpen, setPcccModalOpen] = useState(false);
+    const [warehouseModalOpen, setWarehouseModalOpen] = useState(false);
+    const [sourcingMgmtModalOpen, setSourcingMgmtModalOpen] = useState(false);
+    const [historyModalOpen, setHistoryModalOpen] = useState(false);
+    const [addSourcingModalOpen, setAddSourcingModalOpen] = useState(false);
+    const [domesticSettleModalOpen, setDomesticSettleModalOpen] = useState(false);
 
     // Filter for shipping-related statuses
-    const shippingStatuses = useMemo(() => [
-        '현지 발송 대기중', '현지 배송중', '현지 배송 완료',
-        '입고 대기', '입고중', '견적 완료', '배송비 결제 완료',
-        '출고 준비', '출고 완료', '국내 입항', '통관중', '통관 완료',
-        '국내 배송 시작', '국내 배송중', '배송 완료',
-        '오류입고', '검수불합격'
-    ], []);
+    const shippingStatuses = useMemo(() => ORDER_STATUSES.SHIPPING, []);
 
     const shippingOrders = useMemo(() =>
         mockOrders.filter(o => shippingStatuses.includes(o.status)),
@@ -41,15 +48,29 @@ export default function ShippingPage() {
     };
 
     const handleDomesticTracking = (order: Order) => {
-        toast.info(`국내 송장 조회: ${order.domesticTracking?.carrier} ${order.domesticTracking?.trackingNumber}`);
+        // toast.info(`국내 송장 조회: ${order.domesticTracking?.carrier} ${order.domesticTracking?.trackingNumber}`);
+        setSelectedOrder(order);
+        setDomesticSettleModalOpen(true);
     };
 
     const handleSourcing = (order: Order) => {
-        toast.message("추가 소싱하기", { description: "이 기능은 추후 구현될 예정입니다." });
+        setSelectedOrder(order);
+        setAddSourcingModalOpen(true);
     };
 
     const handleWarehouse = (order: Order) => {
-        toast.message("배송대행지 관리", { description: "이 기능은 추후 구현될 예정입니다." });
+        setSelectedOrder(order);
+        setWarehouseModalOpen(true);
+    };
+
+    const handleSourcingManagement = (order: Order) => {
+        setSelectedOrder(order);
+        setSourcingMgmtModalOpen(true);
+    };
+
+    const handleHistory = (order: Order) => {
+        setSelectedOrder(order);
+        setHistoryModalOpen(true);
     };
 
     const handlePcccClick = (order: Order) => {
@@ -77,18 +98,23 @@ export default function ShippingPage() {
                         };
 
                         return (
-                            <div className="flex flex-col text-sm">
-                                <div className="font-medium flex items-center gap-1">
+                            <div className="flex flex-col text-sm gap-0.5">
+                                <div className="font-medium">
                                     {recipient.name}
+                                </div>
+                                <span className="text-xs text-muted-foreground">{recipient.phone}</span>
+                                <div className="mt-0.5">
                                     {isPccMissing ? (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={handleSendAlert}
-                                            className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
-                                        >
-                                            통관부호 요청
-                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleSendAlert}
+                                                className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
+                                            >
+                                                통관부호 요청
+                                            </Button>
+                                        </div>
                                     ) : (
                                         <Button
                                             variant="outline"
@@ -103,10 +129,6 @@ export default function ShippingPage() {
                                         </Button>
                                     )}
                                 </div>
-                                <span className="text-xs text-muted-foreground">{recipient.phone}</span>
-                                {isPccMissing && (
-                                    <span className="text-[10px] text-red-500 font-medium">⚠️ 통관부호 누락</span>
-                                )}
                             </div>
                         );
                     },
@@ -134,9 +156,10 @@ export default function ShippingPage() {
             window.removeEventListener('action-add-sourcing', handleSourcingEvent);
             window.removeEventListener('action-check-tracking', handleTrackingControlEvent);
         };
-    }, [handleSourcing, handleDomesticTracking]);
+    }, []);
 
     return (
+
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
@@ -147,7 +170,24 @@ export default function ShippingPage() {
                 </div>
             </div>
 
-            <OrderSearch baseData={shippingOrders} onSearch={setFilteredOrders} />
+            <OrderSearch
+                baseData={shippingOrders}
+                onSearch={setFilteredOrders}
+                statusOptions={shippingStatuses}
+                action={
+                    <Button
+                        onClick={() => {
+                            import("sonner").then(({ toast }) => {
+                                toast.success("마켓 주문을 동기화하고 있습니다...", { description: "잠시만 기다려주세요." });
+                                setTimeout(() => toast.success("주문 동기화가 완료되었습니다."), 1500);
+                            });
+                        }}
+                    >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        주문 불러오기
+                    </Button>
+                }
+            />
 
             <Card className="p-0 overflow-hidden shadow-sm border-gray-200">
                 <OrderTable
@@ -156,6 +196,9 @@ export default function ShippingPage() {
                     onTrackingClick={handleTracking}
                     onWarehouseClick={handleWarehouse}
                     onSourcingClick={handleSourcing}
+                    onSourcingManagementClick={handleSourcingManagement}
+                    onHistoryClick={handleHistory}
+                    viewMode="SHIPPING"
                 />
             </Card>
 
@@ -169,6 +212,35 @@ export default function ShippingPage() {
                 open={pcccModalOpen}
                 onOpenChange={setPcccModalOpen}
                 order={selectedOrder}
+            />
+            <WarehouseModal
+                open={warehouseModalOpen}
+                onOpenChange={setWarehouseModalOpen}
+                order={selectedOrder}
+            />
+            <SourcingManagementModal
+                open={sourcingMgmtModalOpen}
+                onOpenChange={setSourcingMgmtModalOpen}
+                order={selectedOrder}
+            />
+            <OrderHistoryModal
+                open={historyModalOpen}
+                onOpenChange={setHistoryModalOpen}
+                order={selectedOrder}
+            />
+            <AddSourcingModal
+                open={addSourcingModalOpen}
+                onOpenChange={setAddSourcingModalOpen}
+                order={selectedOrder}
+            />
+            <DomesticTrackingConfirmModal
+                open={domesticSettleModalOpen}
+                onOpenChange={setDomesticSettleModalOpen}
+                order={selectedOrder}
+                onFullTrackingClick={() => {
+                    setDomesticSettleModalOpen(false);
+                    setTimeout(() => setTrackingModalOpen(true), 150);
+                }}
             />
         </div>
     );

@@ -5,37 +5,75 @@ import { Order } from "@/types/order";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, ChevronRight, AlertCircle, Truck } from "lucide-react";
+import { ChevronDown, ChevronRight, AlertCircle, Truck, CheckCircle2, StickyNote, ExternalLink } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import Image from "next/image";
+import { formatDistanceToNow } from "date-fns";
+import { ko } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 // Helper for status badge colors
 const getStatusBadgeVariant = (status: string) => {
-    if (status === '신규 주문') return 'default'; // Primary (Black/White)
-    if (status.includes('취소') || status.includes('반품') || status.includes('오류')) return 'destructive';
-    if (status === '발송대기') return 'secondary';
-    if (status === '배송 완료' || status === '정산 완료') return 'outline'; // Greenish usually better but outline for success
-    return 'secondary';
+    // New Order: Black/White (Default)
+    if (status === '신규 주문') return 'default';
+
+    // Waiting Sourcing/Selection: Orange/Yellow
+    if (status === '소싱상품 선택대기' || status === '발송대기' || status === '입고 대기' || status === '입고중' || status === '견적 완료') return 'secondary'; // Tailwind 'secondary' is usually gray/zinc. We might need custom classes if 'variant' is limited to shadcn presets. 
+    // Actually, Shadcn Badge variants are usually: default, secondary, destructive, outline. 
+    // For more colors, we might need to apply className directly in the cell.
+
+    // Statuses generally:
+    if (status.includes('취소') || status.includes('반품') || status.includes('오류') || status.includes('거절') || status.includes('불가') || status.includes('실패')) return 'destructive';
+
+    if (status === '결제 대기' || status === '배송비 결제 대기') return 'outline'; // Blue-ish intent?
+
+    if (status === '결제 완료' || status === '배송비 결제 완료') return 'outline'; // Green-ish intent?
+
+    return 'outline';
 };
+
+// ... (getStatusBadgeVariant limitations handled in Cell)
+
+const getStatusColorClass = (status: string) => {
+    if (status === '신규 주문') return 'bg-zinc-900 text-white hover:bg-zinc-800 border-zinc-900';
+
+    if (status === '소싱상품 선택대기' || status === '발송대기') return 'bg-orange-100 text-orange-700 hover:bg-orange-100 border-orange-200';
+    if (status === '입고 대기' || status === '입고중' || status === '견적 완료') return 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100 border-yellow-200';
+
+    if (status === '결제 대기' || status === '배송비 결제 대기') return 'bg-sky-100 text-sky-700 hover:bg-sky-100 border-sky-200';
+    if (status === '결제 완료' || status === '배송비 결제 완료') return 'bg-green-100 text-green-700 hover:bg-green-100 border-green-200';
+
+    if (status.includes('배송') || status.includes('통관') || status.includes('출고')) return 'bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-indigo-200';
+
+    if (status.includes('취소') || status.includes('반품') || status.includes('오류') || status.includes('거절') || status.includes('불가') || status.includes('실패')) return 'bg-red-50 text-red-700 hover:bg-red-50 border-red-200';
+
+    return 'bg-gray-100 text-gray-700 hover:bg-gray-100 border-gray-200';
+}
 
 const getMarketIcon = (market: string) => {
-    // Simple text fallback for icons now
     switch (market) {
-        case 'naver': return <span className="text-[10px] font-bold text-green-500 border border-green-500 rounded px-1">N</span>;
-        case 'coupang': return <span className="text-[10px] font-bold text-red-500 border border-red-500 rounded px-1">C</span>;
-        case '11st': return <span className="text-[10px] font-bold text-red-700 border border-red-700 rounded px-1">11</span>;
-        default: return <span className="text-[10px] font-bold text-gray-500 border border-gray-500 rounded px-1">E</span>;
+        case 'naver':
+            return <div className="w-5 h-5 bg-[#03C75A] text-white text-[10px] font-bold flex items-center justify-center rounded-sm">N</div>;
+        case 'coupang':
+            return <div className="w-5 h-5 bg-[#E61328] text-white text-[10px] font-bold flex items-center justify-center rounded-sm">C</div>;
+        case '11st':
+            return <div className="w-5 h-5 bg-[#F43142] text-white text-[10px] font-bold flex items-center justify-center rounded-sm">11</div>;
+        case 'esm':
+        case 'gmarket':
+        case 'auction':
+            return <div className="w-5 h-5 bg-[#02a94f] text-white text-[8px] font-bold flex items-center justify-center rounded-sm">ESM</div>;
+        default:
+            return <div className="w-5 h-5 bg-gray-500 text-white text-[10px] font-bold flex items-center justify-center rounded-sm">E</div>;
     }
 };
 
-const getMarketName = (market: string) => {
-    switch (market) {
-        case 'naver': return '네이버';
-        case 'coupang': return '쿠팡';
-        case '11st': return '11번가';
-        case 'esm': return 'ESM';
-        default: return market;
-    }
-};
+// Helper removed as we use storeName directly
+
 
 // Reordered columns based on documentation:
 // Actions -> OrderDate -> Product -> Status -> Recipient -> Price -> Market -> Memo.
@@ -94,39 +132,35 @@ export const columns: ColumnDef<Order>[] = [
             // 1. 신규 주문 Actions
             if (status === '신규 주문') {
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-1 w-full max-w-[150px]">
                         <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs border-zinc-200"
+                            className="h-7 text-[11px] w-full bg-[#18181b] text-white hover:bg-[#27272a] rounded-md shadow-sm border border-zinc-800"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.dispatchEvent(new CustomEvent('action-tracking-input', { detail: row.original }));
                             }}
                         >
-                            송장
+                            발주 확인하기
                         </Button>
                         <Button
                             variant="outline"
-                            size="sm"
-                            className="h-7 text-xs border-blue-200 text-blue-600 hover:bg-blue-50"
+                            className="h-7 text-[11px] w-full bg-white hover:bg-zinc-50 border-zinc-300 text-zinc-700 rounded-md shadow-sm"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.dispatchEvent(new CustomEvent('action-review-margin', { detail: row.original }));
                             }}
                         >
-                            마진
+                            마진 검토하기
                         </Button>
                         <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
+                            variant="outline"
+                            className="h-7 text-[11px] w-full bg-white hover:bg-red-50 border-zinc-300 text-red-600 rounded-md shadow-sm"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.dispatchEvent(new CustomEvent('action-cancel-order', { detail: row.original }));
                             }}
                         >
-                            취소
+                            주문 취소하기
                         </Button>
                     </div>
                 );
@@ -134,63 +168,59 @@ export const columns: ColumnDef<Order>[] = [
 
             // 2. 발송 대기 Actions
             if (status === '발송대기') {
-                const isAutoSync = ['coupang', 'esm'].includes(marketType);
-
                 return (
-                    <div className="flex items-center gap-2">
-                        {!isAutoSync ? (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 text-xs border-orange-200 text-orange-700 hover:bg-orange-50"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.dispatchEvent(new CustomEvent('action-register-invoice', { detail: row.original }));
-                                }}
-                            >
-                                <AlertCircle className="h-3 w-3 mr-1" />
-                                작업필요
-                            </Button>
-                        ) : (
-                            <Badge variant="secondary" className="text-[10px] text-muted-foreground font-normal">
-                                자동 동기화됨
-                            </Badge>
-                        )}
+                    <div className="flex flex-col gap-1.5 w-full max-w-[150px]">
+                        <Button
+                            className="h-7 text-[11px] w-full bg-[#18181b] text-white hover:bg-[#27272a] rounded-md shadow-sm border border-zinc-800"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                window.dispatchEvent(new CustomEvent('action-register-invoice', { detail: row.original }));
+                            }}
+                        >
+                            직접전달 처리하기
+                        </Button>
+                        <Button
+                            className="h-7 text-[11px] w-full bg-[#18181b] text-white hover:bg-[#27272a] rounded-md shadow-sm border border-zinc-800"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                window.dispatchEvent(new CustomEvent('action-register-sourcing', { detail: row.original }));
+                            }}
+                        >
+                            소싱상품 등록하기
+                        </Button>
                     </div>
                 );
             }
 
-            // 3. 배송중 / 배송완료 등 Actions
-            const shippingStatuses = ['배송중', '국내 배송중', '배송 완료', '현지 배송중', '통관중'];
+            // 3. 배송중 / 배송완료 등 Actions (Shipping Menu Focus)
+            const shippingStatuses = ['배송중', '국내 배송중', '배송 완료', '현지 배송중', '통관중', '국내 입항', '출고 완료', '출고 준비'];
+
             if (shippingStatuses.some(s => status.includes(s)) || (status as string) === '배송 중') {
                 return (
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                window.dispatchEvent(new CustomEvent('action-add-sourcing', { detail: row.original }));
-                            }}
-                        >
-                            추가소싱
-                        </Button>
-
-                        {status.includes('국내') && (
+                    <div className="flex flex-col gap-1 w-full max-w-[140px]">
+                        {status === '국내 배송중' && (
                             <Button
-                                variant="default" // Primary color for domestic tracking
-                                size="sm"
-                                className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
+                                className="h-7 text-[10px] w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     window.dispatchEvent(new CustomEvent('action-check-tracking', { detail: row.original }));
                                 }}
                             >
                                 <Truck className="h-3 w-3 mr-1" />
-                                송장확인
+                                국내 송장 확인
                             </Button>
                         )}
+
+                        <Button
+                            variant="outline"
+                            className="h-7 text-[10px] w-full bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-700 rounded-md"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                window.dispatchEvent(new CustomEvent('action-add-sourcing', { detail: row.original }));
+                            }}
+                        >
+                            추가 소싱하기
+                        </Button>
                     </div>
                 );
             }
@@ -205,12 +235,15 @@ export const columns: ColumnDef<Order>[] = [
         accessorKey: "orderDate",
         header: "주문일시",
         cell: ({ row }) => {
+            const date = new Date(row.original.orderDate);
+            const relativeTime = formatDistanceToNow(date, { addSuffix: true, locale: ko });
+
             return (
-                <div className="flex flex-col text-xs text-muted-foreground">
+                <div className="flex flex-col text-xs text-muted-foreground whitespace-nowrap">
                     <span className="font-medium text-foreground">{row.original.orderDate.split(' ')[0]}</span>
                     <div className="flex items-center gap-1">
                         <span>{row.original.orderDate.split(' ')[1]}</span>
-                        <span className="text-[10px] opacity-70">(2시간 전)</span>
+                        <span className="text-[10px] opacity-70">({relativeTime})</span>
                     </div>
                 </div>
             );
@@ -225,18 +258,23 @@ export const columns: ColumnDef<Order>[] = [
                 <div className="flex items-center gap-3 min-w-[300px]">
                     <div className="relative h-10 w-10 flex-shrink-0 rounded overflow-hidden border">
                         <Image src={product.thumbnail} alt={product.name} fill sizes="40px" className="object-cover" />
+                        {product.isAiOption && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-blue-600/90 text-[7px] text-white text-center py-0.5 leading-none">
+                                AI 옵션 이미지
+                            </div>
+                        )}
                     </div>
                     <div className="flex flex-col gap-0.5 overflow-hidden">
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-medium truncate max-w-[200px]" title={product.name}>
-                                {product.name}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground shrink-0 border rounded px-1">
-                                {row.original.marketOrderId}
-                            </span>
-                        </div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[240px]">
+                        <span className="text-sm font-medium truncate max-w-[300px]" title={product.name}>
+                            {product.name}
+                        </span>
+                        <div className="text-xs text-muted-foreground truncate max-w-[300px]">
                             {product.optionName}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-muted-foreground">
+                                마켓 주문번호: {row.original.marketOrderId}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -249,7 +287,7 @@ export const columns: ColumnDef<Order>[] = [
         cell: ({ row }) => {
             const status = row.original.status;
             return (
-                <Badge variant={getStatusBadgeVariant(status)} className="whitespace-nowrap">
+                <Badge variant="outline" className={`whitespace-nowrap ${getStatusColorClass(status)} border`}>
                     {status}
                 </Badge>
             );
@@ -263,75 +301,51 @@ export const columns: ColumnDef<Order>[] = [
             const recipient = row.original.recipient;
             const isPccMissing = !recipient.pccc || recipient.pccc.length < 12;
 
-            const handleSendAlert = (e: React.MouseEvent) => {
-                e.stopPropagation();
-                import("sonner").then(({ toast }) => {
-                    toast.success(`[${recipient.name}] 고객님에게 PCCC 요청 알림톡을 발송했습니다.`);
-                });
-            };
-
             return (
-                <div className="flex flex-col text-sm">
-                    <div className="font-medium flex items-center gap-1">
+                <div className="flex flex-col text-sm gap-0.5 min-w-[100px]">
+                    <div className="font-medium whitespace-nowrap">
                         {recipient.name}
-                        {isPccMissing ? (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleSendAlert}
-                                className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
-                            >
-                                통관부호 요청
-                            </Button>
-                        ) : (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    const event = new CustomEvent('openPcccModal', { detail: row.original });
-                                    window.dispatchEvent(event);
-                                }}
-                                className="h-5 px-1.5 text-[10px] bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700"
-                            >
-                                통관부호 확인
-                            </Button>
-                        )}
                     </div>
-                    <span className="text-xs text-muted-foreground">{recipient.phone}</span>
-                    {isPccMissing && (
-                        <span className="text-[10px] text-red-500 font-medium">⚠️ 통관부호 누락</span>
-                    )}
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">{recipient.phone}</span>
+                    <div className="mt-1 flex items-center">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="cursor-pointer">
+                                        {isPccMissing ? (
+                                            <AlertCircle className="h-4 w-4 text-red-500 hover:text-red-600" />
+                                        ) : (
+                                            <CheckCircle2 className="h-4 w-4 text-green-500 hover:text-green-600" />
+                                        )}
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="text-xs">
+                                        PCCC: {recipient.pccc || '미입력'}
+                                        {isPccMissing && ' (수정필요)'}
+                                    </p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                 </div>
             );
         },
     },
     {
         accessorKey: "paymentPrice",
-        header: "결제/마진정보",
+        header: "결제가격",
         cell: ({ row }) => {
             const price = row.original.paymentPrice;
-            const settlement = row.original.expectedSettlement;
-            const platformFee = row.original.platformFee || 0;
-
-            // Calculate margin (simplified)
-            const sourcingCost = row.original.sourcingHistory[0]?.sourcingPriceKRW || 0;
-            const shippingCost = row.original.warehouse?.shippingCost || 0;
-            const totalCost = sourcingCost + shippingCost + platformFee;
-            const margin = settlement - totalCost;
-            const marginRate = settlement > 0 ? ((margin / settlement) * 100) : 0;
-
-            const isNegative = margin < 0;
-            const marginColor = isNegative ? 'text-red-600' : marginRate > 20 ? 'text-green-600' : 'text-orange-600';
+            const quantity = row.original.product.quantity;
 
             return (
-                <div className="flex flex-col text-xs gap-0.5">
-                    <div className="font-semibold text-sm">{new Intl.NumberFormat('ko-KR').format(price)}원</div>
-                    <div className="text-muted-foreground">
-                        정산: {new Intl.NumberFormat('ko-KR').format(settlement)}원
+                <div className="flex flex-col text-xs gap-0.5 whitespace-nowrap">
+                    <div className="font-semibold text-sm">
+                        {new Intl.NumberFormat('ko-KR').format(price)}원
                     </div>
-                    <div className={`font-medium ${marginColor}`}>
-                        마진: {isNegative ? '-' : '+'}{marginRate.toFixed(1)}% = {isNegative ? '-' : '+'}{new Intl.NumberFormat('ko-KR').format(Math.abs(margin))}원
+                    <div className="text-muted-foreground text-[10px]">
+                        / {quantity}개
                     </div>
                 </div>
             );
@@ -341,11 +355,10 @@ export const columns: ColumnDef<Order>[] = [
         accessorKey: "marketType",
         header: "마켓",
         cell: ({ row }) => {
-            const marketName = getMarketName(row.original.marketType);
             return (
                 <div className="flex flex-col items-start gap-1">
                     {getMarketIcon(row.original.marketType)}
-                    <span className="text-xs font-medium">{marketName}</span>
+                    <span className="text-xs font-medium">{row.original.storeName}</span>
                 </div>
             );
         },
@@ -356,9 +369,25 @@ export const columns: ColumnDef<Order>[] = [
         cell: ({ row }) => {
             const memo = row.original.internalMemo;
             return (
-                <div className="text-xs text-muted-foreground max-w-[100px] truncate" title={memo}>
-                    {memo || '-'}
-                </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex justify-center cursor-help">
+                                <StickyNote
+                                    className={cn(
+                                        "h-4 w-4 transition-colors",
+                                        memo ? "text-blue-500 fill-blue-50" : "text-muted-foreground/30"
+                                    )}
+                                />
+                            </div>
+                        </TooltipTrigger>
+                        {memo && (
+                            <TooltipContent side="left" className="max-w-[200px] break-all">
+                                <p className="text-[11px] leading-relaxed">{memo}</p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </TooltipProvider>
             );
         },
     },

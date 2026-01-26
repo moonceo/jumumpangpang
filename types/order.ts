@@ -1,12 +1,14 @@
 export type OrderStatus =
     | '신규 주문'
+    // Waiting
     | '통관부호 수집중'
+    | '소싱상품 선택대기'
+    | '결제 대기'
     | '결제 완료'
-    | '발주 확인'
-    | '발송대기' // Added for local mapping
+    | '알 수 없는 상태'
+    // Shipping
     | '현지 발송 대기중'
     | '현지 배송중'
-    | '현지 배송 완료'
     | '입고 대기'
     | '입고중'
     | '견적 완료'
@@ -14,17 +16,34 @@ export type OrderStatus =
     | '출고 준비'
     | '출고 완료'
     | '국내 입항'
+    | '국내 배송중'
+    // Claims
+    | '취소 요청'
+    | '취소 처리중'
+    | '취소 완료'
+    | '취소 거부'
+    | '반품 요청'
+    | '반품 수거중'
+    | '반품 수거 완료'
+    | '반품 처리중'
+    | '반품 완료'
+    | '반품 거부'
+    | '교환 요청'
+    | '교환 수거중'
+    | '교환 수거 완료'
+    | '교환 처리중'
+    | '교환 재배송중'
+    | '교환 완료'
+    | '교환 거부'
+    // Others/Legacy
+    | '발주 확인'
+    | '발송대기'
+    | '현지 배송 완료'
     | '통관중'
     | '통관 완료'
     | '국내 배송 시작'
-    | '국내 배송중'
     | '배송 완료'
     | '주문 취소'
-    | '취소 요청'
-    | '반품 요청'
-    | '반품 수거중'
-    | '반품 완료'
-    | '교환 요청'
     | '오류입고'
     | '검수불합격';
 
@@ -96,6 +115,7 @@ export interface Order {
     id: string; // Internal system ID
     marketOrderId: string; // Market's order ID
     marketType: MarketType;
+    storeName: string; // Seller's store name
     orderDate: string;
 
     status: OrderStatus;

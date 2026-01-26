@@ -48,27 +48,59 @@ export function OrderHistoryModal({ order, open, onOpenChange }: OrderHistoryMod
             details: "사진 8장 업로드 완료 | 검수 결과: 정상"
         },
         {
+            category: "시스템",
+            icon: <Settings className="h-3 w-3" />,
+            color: "text-slate-500 bg-slate-50",
+            title: "자동 결제 시도",
+            date: "2월 28일 09:00",
+            details: "배송비 결제 (카드: ****-1234) | 성공"
+        },
+        {
+            category: "배대지",
+            icon: <Warehouse className="h-3 w-3" />,
+            color: "text-orange-500 bg-orange-50",
+            title: "입고 완료 (무게측정)",
+            date: "2월 28일 08:50",
+            details: "실무게: 1.8kg | 부피무게: 2.0kg"
+        },
+        {
+            category: "배대지",
+            icon: <Warehouse className="h-3 w-3" />,
+            color: "text-orange-500 bg-orange-50",
+            title: "배대지 도착",
+            date: "2월 28일 08:30",
+            details: "중국 내 배송완료 -> 배대지 도착 확인"
+        },
+        {
             category: "주문팡팡 AI",
             icon: <Cpu className="h-3 w-3" />,
             color: "text-purple-500 bg-purple-50",
-            title: "오류 입고 무시됨",
-            date: "2월 28일 08:30",
-            details: "자동 처리 로그 | cause: Inbound_Error (사소한 박스 훼손)"
+            title: "송장 자동 매칭",
+            date: "2월 26일 14:00",
+            details: "트래킹번호 자동 감지: YTO Express 12345678"
         },
         {
             category: "셀러",
             icon: <User className="h-3 w-3" />,
             color: "text-blue-500 bg-blue-50",
-            title: "소싱 주문 환불",
-            date: "2월 28일 07:44",
-            details: "소싱 주문 ID: aQr1RCB1p7GT9wrZ | 환불 사유: 재고 부족"
+            title: "중국 내 발송",
+            date: "2월 26일 10:00",
+            details: "판매자가 상품을 발송했습니다."
+        },
+        {
+            category: "셀러",
+            icon: <User className="h-3 w-3" />,
+            color: "text-blue-500 bg-blue-50",
+            title: "발주 확인",
+            date: "2월 25일 18:00",
+            details: "판매자가 주문을 확인했습니다."
         },
         {
             category: "시스템",
             icon: <Settings className="h-3 w-3" />,
             color: "text-slate-500 bg-slate-50",
             title: "마켓 주문 수집",
-            date: "1월 24일 10:00",
+            date: "2월 25일 17:30",
             details: "네이버 스마트스토어로부터 주문 데이터 정상 수집 완료"
         }
     ];
@@ -82,7 +114,7 @@ export function OrderHistoryModal({ order, open, onOpenChange }: OrderHistoryMod
                             <ClipboardList className="h-5 w-5 text-slate-500" />
                             주문 히스토리
                         </DialogTitle>
-                        <p className="text-xs text-muted-foreground">총 {events.length}개의 이벤트가 기록되었습니다.</p>
+                        <p className="text-xs text-muted-foreground">총 33개의 이벤트가 기록되었습니다.</p>
                     </div>
                     <div className="relative w-40">
                         <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />

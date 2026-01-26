@@ -1,8 +1,9 @@
 "use client";
-
+import { RefreshCw } from "lucide-react";
 import { OrderTable } from "@/components/orders/shared/order-table";
 import { columns as defaultColumns } from "@/components/orders/shared/columns";
 import { mockOrders } from "@/lib/mock-data/orders";
+import { ORDER_STATUSES } from "@/lib/constants/orders";
 import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Order } from "@/types/order";
@@ -13,6 +14,7 @@ import { TrackingModal } from "@/components/orders/modals/tracking-modal";
 import { OrderHistoryModal } from "@/components/orders/modals/order-history-modal";
 import { PcccInfoModal } from "@/components/orders/modals/pccc-info-modal";
 import { Button } from "@/components/ui/button";
+
 
 export default function AllOrdersPage() {
     // Show all orders
@@ -70,18 +72,23 @@ export default function AllOrdersPage() {
                         };
 
                         return (
-                            <div className="flex flex-col text-sm">
-                                <div className="font-medium flex items-center gap-1">
+                            <div className="flex flex-col text-sm gap-0.5">
+                                <div className="font-medium">
                                     {recipient.name}
+                                </div>
+                                <span className="text-xs text-muted-foreground">{recipient.phone}</span>
+                                <div className="mt-0.5">
                                     {isPccMissing ? (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={handleSendAlert}
-                                            className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
-                                        >
-                                            통관부호 요청
-                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleSendAlert}
+                                                className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
+                                            >
+                                                통관부호 요청
+                                            </Button>
+                                        </div>
                                     ) : (
                                         <Button
                                             variant="outline"
@@ -96,10 +103,6 @@ export default function AllOrdersPage() {
                                         </Button>
                                     )}
                                 </div>
-                                <span className="text-xs text-muted-foreground">{recipient.phone}</span>
-                                {isPccMissing && (
-                                    <span className="text-[10px] text-red-500 font-medium">⚠️ 통관부호 누락</span>
-                                )}
                             </div>
                         );
                     },
@@ -121,7 +124,24 @@ export default function AllOrdersPage() {
             </div>
 
             {/* Search & Filter Bar */}
-            <OrderSearch baseData={mockOrders} onSearch={(filtered: Order[]) => setOrders(filtered)} />
+            <OrderSearch
+                baseData={mockOrders}
+                onSearch={setOrders}
+                statusOptions={ORDER_STATUSES.ALL}
+                action={
+                    <Button
+                        onClick={() => {
+                            import("sonner").then(({ toast }) => {
+                                toast.success("마켓 주문을 동기화하고 있습니다...", { description: "잠시만 기다려주세요." });
+                                setTimeout(() => toast.success("주문 동기화가 완료되었습니다."), 1500);
+                            });
+                        }}
+                    >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        주문 불러오기
+                    </Button>
+                }
+            />
 
             {/* Main Table */}
             <Card className="p-0 overflow-hidden shadow-sm border-gray-200">

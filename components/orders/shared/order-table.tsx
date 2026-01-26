@@ -27,7 +27,6 @@ import { Input } from "@/components/ui/input";
 import { ExpandableRowContent } from "./expandable-row-content";
 import { Order } from "@/types/order";
 import { RefreshCw, Search } from "lucide-react";
-import { StatusFilter } from "./status-filter";
 import { Badge } from "@/components/ui/badge";
 
 interface OrderTableProps {
@@ -37,6 +36,8 @@ interface OrderTableProps {
     onWarehouseClick?: (order: Order) => void;
     onSourcingClick?: (order: Order) => void;
     onHistoryClick?: (order: Order) => void;
+    onSourcingManagementClick?: (order: Order) => void;
+    viewMode?: 'NEW' | 'WAITING' | 'SHIPPING' | 'CLAIMS' | 'ALL';
 }
 
 export function OrderTable({
@@ -45,14 +46,17 @@ export function OrderTable({
     onTrackingClick,
     onWarehouseClick,
     onSourcingClick,
-    onHistoryClick
+    onHistoryClick,
+    onSourcingManagementClick,
+    viewMode
 }: OrderTableProps) {
-    const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [sorting, setSorting] = React.useState<SortingState>([
+        { id: "orderDate", desc: true }
+    ]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
     const [expanded, setExpanded] = React.useState({});
-    const [selectedStatuses, setSelectedStatuses] = React.useState<Set<string>>(new Set());
 
     const table = useReactTable({
         data,
@@ -81,30 +85,10 @@ export function OrderTable({
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 max-w-xl">
 
-                    <StatusFilter
-                        selectedValues={selectedStatuses}
-                        onSelect={(value) => {
-                            const newSet = new Set(selectedStatuses);
-                            if (newSet.has(value)) newSet.delete(value);
-                            else newSet.add(value);
-                            setSelectedStatuses(newSet);
-                            table.getColumn("status")?.setFilterValue(Array.from(newSet));
-                        }}
-                        onClear={() => {
-                            setSelectedStatuses(newSet => {
-                                const n = new Set<string>();
-                                return n;
-                            });
-                            table.getColumn("status")?.setFilterValue(undefined);
-                        }}
-                    />
+
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground mr-2">마지막 업데이트: 방금 전</span>
-                    <Button size="sm" className="h-8">
-                        <RefreshCw className="h-3.5 w-3.5 mr-2" />
-                        주문 불러오기
-                    </Button>
                 </div>
             </div>
 
@@ -155,6 +139,8 @@ export function OrderTable({
                                                     onWarehouseClick={onWarehouseClick}
                                                     onSourcingClick={onSourcingClick}
                                                     onHistoryClick={onHistoryClick}
+                                                    onSourcingManagementClick={onSourcingManagementClick}
+                                                    viewMode={viewMode}
                                                 />
                                             </TableCell>
                                         </TableRow>

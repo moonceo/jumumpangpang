@@ -3,21 +3,19 @@
 import { OrderTable } from "@/components/orders/shared/order-table";
 import { columns as defaultColumns } from "@/components/orders/shared/columns";
 import { mockOrders } from "@/lib/mock-data/orders";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import { PcccInfoModal } from "@/components/orders/modals/pccc-info-modal";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Order } from "@/types/order";
 import { OrderSearch } from "@/components/orders/shared/order-search";
+import { ORDER_STATUSES } from "@/lib/constants/orders";
 
 export default function ClaimsPage() {
     // Filter for Claims related statuses
-    const claimStatuses = useMemo(() => [
-        '주문 취소', '취소 요청', '반품 요청',
-        '반품 수거중', '반품 완료', '교환 요청',
-        '오류입고', '검수불합격'
-    ], []);
+    // Filter for Claims related statuses
+    const claimStatuses = useMemo(() => ORDER_STATUSES.CLAIMS, []);
 
     const claimOrders = useMemo(() =>
         mockOrders.filter(o => claimStatuses.includes(o.status)),
@@ -53,18 +51,23 @@ export default function ClaimsPage() {
                         };
 
                         return (
-                            <div className="flex flex-col text-sm">
-                                <div className="font-medium flex items-center gap-1">
+                            <div className="flex flex-col text-sm gap-0.5">
+                                <div className="font-medium">
                                     {recipient.name}
+                                </div>
+                                <span className="text-xs text-muted-foreground">{recipient.phone}</span>
+                                <div className="mt-0.5">
                                     {isPccMissing ? (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={handleSendAlert}
-                                            className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
-                                        >
-                                            통관부호 요청
-                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleSendAlert}
+                                                className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
+                                            >
+                                                통관부호 요청
+                                            </Button>
+                                        </div>
                                     ) : (
                                         <Button
                                             variant="outline"
@@ -79,10 +82,6 @@ export default function ClaimsPage() {
                                         </Button>
                                     )}
                                 </div>
-                                <span className="text-xs text-muted-foreground">{recipient.phone}</span>
-                                {isPccMissing && (
-                                    <span className="text-[10px] text-red-500 font-medium">⚠️ 통관부호 누락</span>
-                                )}
                             </div>
                         );
                     },
@@ -106,25 +105,29 @@ export default function ClaimsPage() {
                 </div>
             </div>
 
-            <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900 p-4 rounded-lg flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
-                <div className="space-y-1">
-                    <h4 className="font-semibold text-sm text-orange-900 dark:text-orange-400">반품 처리 가이드 (2단계 프로세스)</h4>
-                    <ol className="text-sm list-decimal list-inside text-orange-800 dark:text-orange-300 space-y-1">
-                        <li>
-                            <span className="font-medium">1단계 (소싱 환불):</span> 먼저 &apos;소싱주문 관리&apos; 채팅으로 판매자에게 반품 의사를 밝히고 반품지 주소를 확보하세요.
-                        </li>
-                        <li>
-                            <span className="font-medium">2단계 (배대지 반품 요청):</span> 확보한 주소를 바탕으로 &apos;배송대행지 관리&apos;에서 반품 신청서를 작성하세요.
-                        </li>
-                    </ol>
-                </div>
-            </div>
 
-            <OrderSearch baseData={claimOrders} onSearch={setFilteredOrders} />
+
+            <OrderSearch
+                baseData={claimOrders}
+                onSearch={setFilteredOrders}
+                statusOptions={ORDER_STATUSES.CLAIMS}
+                action={
+                    <Button
+                        onClick={() => {
+                            import("sonner").then(({ toast }) => {
+                                toast.success("마켓 주문을 동기화하고 있습니다...", { description: "잠시만 기다려주세요." });
+                                setTimeout(() => toast.success("주문 동기화가 완료되었습니다."), 1500);
+                            });
+                        }}
+                    >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        주문 불러오기
+                    </Button>
+                }
+            />
 
             <Card className="p-0 overflow-hidden shadow-sm border-gray-200">
-                <OrderTable data={filteredOrders} columns={pageColumns} />
+                <OrderTable data={filteredOrders} columns={pageColumns} viewMode="CLAIMS" />
             </Card>
             <PcccInfoModal
                 order={selectedOrder}

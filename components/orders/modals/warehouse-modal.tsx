@@ -71,7 +71,7 @@ export function WarehouseModal({ order, open, onOpenChange }: WarehouseModalProp
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold text-sm">확정 배송대행비</h3>
                                     <Badge variant="secondary" className="bg-orange-50 text-orange-700">
-                                        적용무게 {order.warehouse?.weight || "0.0"}kg
+                                        실무게 1.8kg (적용 2.0kg)
                                     </Badge>
                                 </div>
                                 <div className="bg-muted/40 rounded-lg p-4 space-y-3">
@@ -80,10 +80,10 @@ export function WarehouseModal({ order, open, onOpenChange }: WarehouseModalProp
                                         <span className="text-orange-600">11,103원</span>
                                     </div>
                                     <Separator />
-                                    <div className="text-[10px] text-muted-foreground space-y-1">
-                                        <div className="flex justify-between"><span>배송비용</span><span>8,600원</span></div>
-                                        <div className="flex justify-between"><span>부가서비스</span><span>+5,000원</span></div>
-                                        <div className="flex justify-between text-red-500"><span>결제 수수료</span><span>-497원</span></div>
+                                    <div className="text-[11px] text-muted-foreground space-y-1">
+                                        <div className="flex justify-between"><span>기본 배송비 (해운)</span><span>8,800원</span></div>
+                                        <div className="flex justify-between"><span>정밀 검수</span><span>+2,000원</span></div>
+                                        <div className="flex justify-between"><span>통관 수수료</span><span>+303원</span></div>
                                     </div>
                                 </div>
                             </section>
@@ -92,31 +92,29 @@ export function WarehouseModal({ order, open, onOpenChange }: WarehouseModalProp
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold text-sm flex items-center gap-2">
                                         <Camera className="h-4 w-4" />
-                                        검수 사진 ({order.warehouse?.inspectionPhotos?.length || 0})
+                                        검수 사진 (8)
                                     </h3>
                                 </div>
                                 <div className="grid grid-cols-4 gap-2">
-                                    {order.warehouse?.inspectionPhotos?.map((photo, i) => (
-                                        <div key={i} className="relative aspect-square rounded border overflow-hidden">
-                                            <Image src={photo} alt="" fill className="object-cover" />
+                                    {Array.from({ length: 8 }).map((_, i) => (
+                                        <div key={i} className="relative aspect-square rounded border overflow-hidden bg-slate-100">
+                                            <Image
+                                                src={order.warehouse?.inspectionPhotos?.[i % (order.warehouse?.inspectionPhotos?.length || 1)] || "https://images.unsplash.com/photo-1595246140625-573b715d1128?w=150&h=150&fit=crop"}
+                                                alt=""
+                                                fill
+                                                className="object-cover"
+                                            />
                                         </div>
                                     ))}
                                 </div>
                             </section>
 
-                            <Accordion type="single" collapsible className="w-full">
-                                <AccordionItem value="shipping" className="border rounded px-4 py-1 mb-2">
-                                    <AccordionTrigger className="text-sm font-medium">배송 방법</AccordionTrigger>
-                                    <AccordionContent className="space-y-3">
-                                        <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">항공 배송을 추천합니다.</div>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <Button size="sm" variant="outline" className="text-xs h-8 border-blue-500">항공</Button>
-                                            <Button size="sm" variant="outline" className="text-xs h-8">해운(인)</Button>
-                                            <Button size="sm" variant="outline" className="text-xs h-8">해운(평)</Button>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button variant="outline" className="h-9 text-xs">합배송 하기</Button>
+                                <Button variant="outline" className="h-9 text-xs">배대지 주문서 분할 관리</Button>
+                                <Button variant="outline" className="h-9 text-xs">반품신청서 작성</Button>
+                                <Button variant="outline" className="h-9 text-xs">포장 보완 요청</Button>
+                            </div>
                         </div>
 
                         {/* Right Side: Chat */}
@@ -124,22 +122,25 @@ export function WarehouseModal({ order, open, onOpenChange }: WarehouseModalProp
                             <div className="p-4 border-b bg-background/50 backdrop-blur">
                                 <h3 className="font-semibold text-sm flex items-center gap-2">
                                     <MessageSquare className="h-4 w-4 text-blue-500" />
-                                    배대지 채팅
+                                    배대지 1:1 문의
                                 </h3>
                             </div>
                             <ScrollArea className="flex-1 p-4">
                                 <div className="space-y-4 text-xs">
-                                    <div className="bg-white p-2 rounded border max-w-[80%]">안녕하세요, 박스가 훼손되어 사진 확인 부탁드립니다.</div>
-                                    <div className="bg-blue-600 text-white p-2 rounded ml-auto max-w-[80%]">확인했습니다. 내용물은 멀쩡할까요?</div>
+                                    <div className="bg-white p-3 rounded-lg border max-w-[85%] shadow-sm">
+                                        <p className="font-bold mb-1 text-slate-500">배대지 담당자</p>
+                                        안녕하세요. 요청하신 정밀검수 완료되었습니다. 사진 확인 부탁드립니다.
+                                    </div>
+                                    <div className="bg-blue-600 text-white p-3 rounded-lg ml-auto max-w-[85%] shadow-sm">
+                                        확인했습니다. 출고 진행해주세요.
+                                    </div>
                                 </div>
                             </ScrollArea>
-                            <div className="p-4 border-t bg-background space-y-2">
-                                <div className="flex gap-1 overflow-x-auto pb-1">
-                                    <Button variant="outline" className="h-6 text-[10px] whitespace-nowrap">반품신청</Button>
-                                    <Button variant="outline" className="h-6 text-[10px] whitespace-nowrap">포장보완</Button>
+                            <div className="p-3 border-t bg-background space-y-2">
+                                <textarea className="w-full h-20 p-3 text-xs border rounded-lg outline-none resize-none focus:ring-1 focus:ring-blue-500" placeholder="문의 내용을 입력하세요..." />
+                                <div className="flex justify-end">
+                                    <Button size="sm" className="h-8 text-xs bg-blue-600 hover:bg-blue-700">전송</Button>
                                 </div>
-                                <textarea className="w-full h-16 p-2 text-xs border rounded outline-none resize-none" placeholder="내용 입력..." />
-                                <Button className="w-full h-8 text-xs">전송</Button>
                             </div>
                         </div>
                     </div>
