@@ -13,8 +13,15 @@ import {
     ChevronDown,
     ChevronUp,
     Save,
-    X
+    X,
+    Copy
 } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -84,17 +91,20 @@ export function ExpandableRowContent({
                         {!isEditing ? (
                             <>
                                 <div>
-                                    <span className="text-muted-foreground text-xs">성함 / 연락처</span>
-                                    <div className="font-medium">{order.recipient.name} / {order.recipient.phone}</div>
+                                    <span className="text-muted-foreground text-xs font-medium">수령인 성함 / 연락처</span>
+                                    <div className="font-semibold text-slate-900 flex items-center gap-2 mt-0.5">
+                                        {order.recipient.name} / {order.recipient.phone}
+                                        <Badge variant="outline" className="h-4 px-1.5 text-[10px] bg-slate-100 text-slate-600 border-slate-200">수정 가능</Badge>
+                                    </div>
                                 </div>
                                 <div>
-                                    <span className="text-muted-foreground text-xs">주소</span>
-                                    <div>({order.recipient.zipCode}) {order.recipient.address}</div>
-                                    {order.recipient.detailAddress && <div>{order.recipient.detailAddress}</div>}
+                                    <span className="text-muted-foreground text-xs font-medium">배송 주소</span>
+                                    <div className="text-slate-900 mt-0.5 font-medium">({order.recipient.zipCode}) {order.recipient.address}</div>
+                                    {order.recipient.detailAddress && <div className="text-slate-900 font-medium">{order.recipient.detailAddress}</div>}
                                 </div>
                                 <div>
-                                    <span className="text-muted-foreground text-xs">배송메모</span>
-                                    <div className="text-muted-foreground truncate">{order.recipient.deliveryMemo || "-"}</div>
+                                    <span className="text-muted-foreground text-xs font-medium">배송 메시지</span>
+                                    <div className="text-muted-foreground italic mt-0.5">"{order.recipient.deliveryMemo || "메시지가 없습니다."}"</div>
                                 </div>
                             </>
                         ) : (
@@ -114,14 +124,20 @@ export function ExpandableRowContent({
                         )}
 
                         {/* PCCC Logic */}
-                        <div className="pt-2">
-                            <div className="flex items-center justify-between mb-1">
+                        <div className="pt-2 bg-slate-50 dark:bg-zinc-900/50 p-4 rounded-lg border border-dashed mt-4">
+                            <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground text-xs">개인통관고유부호</span>
+                                    <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">주문자 통관 번호 (PCCC)</span>
                                     {isPCCCMissing ? (
-                                        <Badge variant="destructive" className="h-4 px-1 text-[10px]">확인 필요</Badge>
+                                        <Badge variant="destructive" className="h-4 px-1.5 text-[10px] flex items-center gap-1">
+                                            <AlertCircle className="h-2.5 w-2.5" />
+                                            필요
+                                        </Badge>
                                     ) : (
-                                        <Badge variant="outline" className="h-4 px-1 text-[10px] bg-green-50 text-green-700 border-green-200">확인됨</Badge>
+                                        <Badge variant="outline" className="h-4 px-1.5 text-[10px] bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+                                            <Save className="h-2.5 w-2.5" />
+                                            확인됨
+                                        </Badge>
                                     )}
                                 </div>
                             </div>
@@ -129,18 +145,26 @@ export function ExpandableRowContent({
                                 <Input defaultValue={order.recipient.pccc} className="h-8 text-xs font-mono" placeholder="P000000000000" />
                             ) : (
                                 <div className={cn(
-                                    "flex items-center gap-2",
-                                    isPCCCMissing && "text-red-500 font-bold"
+                                    "flex items-center justify-between",
+                                    isPCCCMissing && "text-red-600"
                                 )}>
                                     {isPCCCMissing ? (
                                         <>
-                                            <span className="text-sm">수집되지 않음</span>
-                                            <Button size="sm" variant="outline" className="h-7 text-xs border-blue-200 text-blue-600 hover:bg-blue-50">
-                                                통관부호 확인
+                                            <span className="text-sm font-bold">수집되지 않음</span>
+                                            <Button size="sm" variant="outline" className="h-7 text-xs border-blue-200 text-blue-600 hover:bg-blue-50 shadow-sm">
+                                                문자 발송
                                             </Button>
                                         </>
                                     ) : (
-                                        <span className="font-mono">{order.recipient.pccc}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-mono font-bold text-slate-900 tracking-wider text-sm">{order.recipient.pccc}</span>
+                                            <Button variant="ghost" size="icon" className="h-5 w-5 hover:bg-slate-200" onClick={() => {
+                                                navigator.clipboard.writeText(order.recipient.pccc || "");
+                                                import("sonner").then(({ toast }) => toast.success("통관번호가 복사되었습니다."));
+                                            }}>
+                                                <Copy className="h-3 w-3" />
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -237,17 +261,35 @@ export function ExpandableRowContent({
 
                 <div className="space-y-4">
                     <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">비용 상세</h4>
-                    <div className="space-y-1.5 text-sm">
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">결제 가격</span>
-                            <span className="font-medium">{new Intl.NumberFormat('ko-KR').format(order.paymentPrice)}원</span>
+                    <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">결제 금액</span>
+                            <span className="font-semibold text-slate-900">{new Intl.NumberFormat('ko-KR').format(order.paymentPrice)}원</span>
                         </div>
-                        <div className="flex justify-between text-muted-foreground text-xs italic">
-                            <span>- 플랫폼 수수료</span>
+                        <div className="flex justify-between items-center text-xs text-muted-foreground/80">
+                            <div className="flex items-center gap-1">
+                                <span>- 마켓 수수료</span>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <AlertCircle className="h-3 w-3 cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>플랫폼 판매 수수료 및 결제 수수료</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                             <span>-{new Intl.NumberFormat('ko-KR').format(order.platformFee)}원</span>
                         </div>
-                        <div className="border-t pt-1.5 mt-0.5 flex justify-between font-bold text-slate-900 dark:text-slate-100">
-                            <span>정산 예정 금액</span>
+                        <div className="flex justify-between items-center text-xs text-muted-foreground/80">
+                            <span>- 예상 해외배송비</span>
+                            <span>-{new Intl.NumberFormat('ko-KR').format(order.warehouse?.shippingCost || 0)}원</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-muted-foreground/80">
+                            <span>- 예상 관부가세</span>
+                            <span>-0원</span>
+                        </div>
+                        <div className="border-t pt-2 mt-1 flex justify-between items-center font-bold text-lg text-blue-600 dark:text-blue-400">
+                            <span className="text-sm text-slate-900 dark:text-slate-100 font-semibold">예상 정산액</span>
                             <span>{new Intl.NumberFormat('ko-KR').format(order.expectedSettlement)}원</span>
                         </div>
                     </div>

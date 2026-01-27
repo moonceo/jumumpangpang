@@ -183,7 +183,10 @@ export const mockOrders: Order[] = [
             name: "홍길동",
             phone: "010-1111-2222",
             address: "제주특별자치도 제주시 첨단로 242",
+            zipCode: "63309",
+            detailAddress: "101동 202호",
             pccc: "P123123123123",
+            deliveryMemo: "경비실에 맡겨주세요",
         },
         product: {
             id: "prod_005",
@@ -199,16 +202,29 @@ export const mockOrders: Order[] = [
         expectedSettlement: 124500,
         sourcingHistory: [
             {
-                attempt: 1,
+                attempt: 2,
                 status: "active",
-                productName: "Wooden Cat Tower",
+                productName: "Wooden Cat Tower Premium",
+                thumbnail: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=200&h=200&fit=crop",
+                matchingRate: 98,
+                sourcingPriceCNY: 180,
+                sourcingPriceKRW: 34000,
+                exchangeRatefee: 80,
+                link: "https://detail.tmall.com/item.htm?id=12345",
+                optionName: "5-Tier Wood",
+                localShippingFeeCNY: 0,
+            },
+            {
+                attempt: 1,
+                status: "cancelled",
+                productName: "Wooden Cat Tower Basic",
                 thumbnail: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=200&h=200&fit=crop",
                 matchingRate: 92,
                 sourcingPriceCNY: 150,
                 sourcingPriceKRW: 28000,
                 exchangeRatefee: 80,
                 link: "https://taobao.com",
-                optionName: "5-Tier",
+                optionName: "4-Tier Style A",
                 localShippingFeeCNY: 45,
             }
         ],
@@ -218,6 +234,12 @@ export const mockOrders: Order[] = [
             weight: 15.5,
             shippingCost: 32000,
             inboundDate: format(subDays(now, 3), "yyyy-MM-dd HH:mm"),
+            shippingMethod: 'sea_incheon',
+            services: {
+                inspection: 'precision',
+                packaging: 'corner',
+                etc: ['돼지코 동봉']
+            }
         },
         domesticTracking: {
             carrier: "CJ대한통운",

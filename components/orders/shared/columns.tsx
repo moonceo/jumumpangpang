@@ -334,18 +334,29 @@ export const columns: ColumnDef<Order>[] = [
     },
     {
         accessorKey: "paymentPrice",
-        header: "결제가격",
+        header: "결제가격/마진",
         cell: ({ row }) => {
             const price = row.original.paymentPrice;
+            const settlement = row.original.expectedSettlement;
             const quantity = row.original.product.quantity;
+
+            // Calculate margin rate based on settlement (revenue after platform fee) vs something.
+            // Documentation says: 판매가 - (매입가 + 배송비 + 마켓수수료)
+            // For now, let's use (Settlement - SourcingPrice - WarehouseCost) / Settlement if we have it.
+            // If we don't have all data, show a mock margin based on settlement/price.
+            const marginRate = price > 0 ? ((settlement - (price * 0.7)) / price) * 100 : 0; // Mock calculation
+            const isNegative = marginRate < 0;
 
             return (
                 <div className="flex flex-col text-xs gap-0.5 whitespace-nowrap">
-                    <div className="font-semibold text-sm">
+                    <div className="font-bold text-sm text-foreground">
                         {new Intl.NumberFormat('ko-KR').format(price)}원
                     </div>
-                    <div className="text-muted-foreground text-[10px]">
-                        / {quantity}개
+                    <div className={cn(
+                        "text-[10px] font-medium flex items-center gap-1",
+                        isNegative ? "text-red-500" : "text-green-600"
+                    )}>
+                        {isNegative ? "▼" : "▲"} {Math.abs(marginRate).toFixed(1)}%
                     </div>
                 </div>
             );
@@ -372,13 +383,18 @@ export const columns: ColumnDef<Order>[] = [
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <div className="flex justify-center cursor-help">
+                            <div className="flex items-center gap-1.5 cursor-help min-w-[80px]">
                                 <StickyNote
                                     className={cn(
-                                        "h-4 w-4 transition-colors",
+                                        "h-3.5 w-3.5 transition-colors shrink-0",
                                         memo ? "text-blue-500 fill-blue-50" : "text-muted-foreground/30"
                                     )}
                                 />
+                                {memo && (
+                                    <span className="text-[10px] text-muted-foreground truncate max-w-[60px]">
+                                        {memo}
+                                    </span>
+                                )}
                             </div>
                         </TooltipTrigger>
                         {memo && (
