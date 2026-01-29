@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExpandableRowContent } from "./expandable-row-content";
 import { Order } from "@/types/order";
-import { RefreshCw, Search } from "lucide-react";
+import { RefreshCw, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface OrderTableProps {
@@ -37,6 +37,12 @@ interface OrderTableProps {
     onSourcingClick?: (order: Order) => void;
     onHistoryClick?: (order: Order) => void;
     onSourcingManagementClick?: (order: Order) => void;
+    onPCCClick?: (order: Order) => void;
+    onMemoSave?: (order: Order, memo: string) => void;
+    onRowSelectionChange?: (rowSelection: Record<string, boolean>) => void;
+    onDomesticTrackingClick?: (order: Order) => void;
+    onAddSourcingClick?: (order: Order) => void;
+    onPayShippingClick?: (order: Order) => void;
     viewMode?: 'NEW' | 'WAITING' | 'SHIPPING' | 'CLAIMS' | 'ALL';
 }
 
@@ -48,15 +54,23 @@ export function OrderTable({
     onSourcingClick,
     onHistoryClick,
     onSourcingManagementClick,
+    onPCCClick,
+    onMemoSave,
+    onRowSelectionChange,
+    onDomesticTrackingClick,
+    onAddSourcingClick,
+    onPayShippingClick,
     viewMode
 }: OrderTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([
         { id: "orderDate", desc: true }
     ]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-    const [rowSelection, setRowSelection] = React.useState({});
+    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+        select: viewMode === 'NEW'
+    });
     const [expanded, setExpanded] = React.useState({});
+    const [rowSelection, setRowSelection] = React.useState({});
 
     const table = useReactTable({
         data,
@@ -68,7 +82,11 @@ export function OrderTable({
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
+        onRowSelectionChange: (updaterOrValue) => {
+            const next = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection) : updaterOrValue;
+            setRowSelection(next);
+            onRowSelectionChange?.(next as Record<string, boolean>);
+        },
         onExpandedChange: setExpanded,
         getExpandedRowModel: getExpandedRowModel(),
         state: {
@@ -82,15 +100,6 @@ export function OrderTable({
 
     return (
         <div className="w-full space-y-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-1 max-w-xl">
-
-
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground mr-2">마지막 업데이트: 방금 전</span>
-                </div>
-            </div>
 
             <div className="rounded-md border bg-white dark:bg-zinc-900">
                 <Table>
@@ -118,7 +127,8 @@ export function OrderTable({
                                 <React.Fragment key={row.id}>
                                     <TableRow
                                         data-state={row.getIsSelected() && "selected"}
-                                        className="group"
+                                        className="group cursor-pointer hover:bg-muted/30 transition-colors"
+                                        onClick={() => row.toggleExpanded()}
                                     >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id} className="py-2">
@@ -140,6 +150,11 @@ export function OrderTable({
                                                     onSourcingClick={onSourcingClick}
                                                     onHistoryClick={onHistoryClick}
                                                     onSourcingManagementClick={onSourcingManagementClick}
+                                                    onPCCClick={onPCCClick}
+                                                    onMemoSave={onMemoSave}
+                                                    onDomesticTrackingClick={onDomesticTrackingClick}
+                                                    onAddSourcingClick={onAddSourcingClick}
+                                                    onPayShippingClick={onPayShippingClick}
                                                     viewMode={viewMode}
                                                 />
                                             </TableCell>
@@ -163,25 +178,28 @@ export function OrderTable({
 
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                    총 {table.getFilteredRowModel().rows.length}개의 주문이 있습니다.
                 </div>
-                <div className="space-x-2">
+                <div className="flex items-center space-x-2">
                     <Button
                         variant="outline"
-                        size="sm"
+                        size="icon"
+                        className="h-8 w-8"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
                     >
-                        Previous
+                        <ChevronLeft className="h-4 w-4" />
+                        <span className="sr-only">Previous Page</span>
                     </Button>
                     <Button
                         variant="outline"
-                        size="sm"
+                        size="icon"
+                        className="h-8 w-8"
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                     >
-                        Next
+                        <ChevronRight className="h-4 w-4" />
+                        <span className="sr-only">Next Page</span>
                     </Button>
                 </div>
             </div>

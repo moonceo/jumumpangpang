@@ -27,9 +27,10 @@ export interface OrderSearchProps {
     middleContent?: React.ReactNode;
     action?: React.ReactNode;
     showMarketFilter?: boolean;
+    placeholder?: string;
 }
 
-export function OrderSearch({ baseData, onSearch, statusOptions, action, middleContent, showMarketFilter = true }: OrderSearchProps) {
+export function OrderSearch({ baseData, onSearch, statusOptions, action, middleContent, showMarketFilter = true, placeholder = "상품명, 주문번호, 수령인 검색..." }: OrderSearchProps) {
     const [searchTerm, setSearchTerm] = useState("");
     const [marketFilter, setMarketFilter] = useState("all");
     const [marketOpen, setMarketOpen] = useState(false);
@@ -73,7 +74,7 @@ export function OrderSearch({ baseData, onSearch, statusOptions, action, middleC
             <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="상품명, 주문번호, 수령인 검색..."
+                    placeholder={placeholder}
                     className="pl-9 bg-background"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

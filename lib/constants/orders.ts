@@ -42,7 +42,7 @@ export const ORDER_STATUSES = {
         "알 수 없는 상태"
     ] as string[],
 
-    NEW: ['신규 주문'] as OrderStatus[],
+    NEW: ['신규 주문', '알 수 없는 상태'] as OrderStatus[],
 
     WAITING: [
         '통관부호 수집중',
@@ -58,6 +58,7 @@ export const ORDER_STATUSES = {
         '입고 대기',
         '오류입고',
         '입고중',
+        '결제 대기',
         '견적 완료',
         '배송비 결제 완료',
         '출고 준비',

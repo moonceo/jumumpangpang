@@ -25,7 +25,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_001",
             name: "북유럽 인테리어 모던 거실장 TV장 2000 size",
-            thumbnail: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=200&h=200&fit=crop",
+            thumbnail: "/images/dummy/tv-stand.png",
             optionName: "화이트 / 2000mm",
             quantity: 1,
             unitPrice: 159000,
@@ -57,7 +57,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_002",
             name: "샤오미 로봇청소기 X10 Plus 물걸레 겸용",
-            thumbnail: "https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?w=200&h=200&fit=crop",
+            thumbnail: "/images/dummy/robot-vacuum.png",
             optionName: "화이트 / 기본형",
             quantity: 1,
             unitPrice: 420000,
@@ -88,7 +88,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_003",
             name: "접이식 캠핑 의자 경량 체어",
-            thumbnail: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=200&h=200&fit=crop",
+            thumbnail: "/images/dummy/camping-chair.png",
             optionName: "국방색 / 2개 세트",
             quantity: 2,
             unitPrice: 45000,
@@ -102,14 +102,17 @@ export const mockOrders: Order[] = [
                 attempt: 1,
                 status: "active",
                 productName: "Camping Chair Lightweight",
-                thumbnail: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=200&h=200&fit=crop",
+                thumbnail: "/images/dummy/camping-chair.png",
                 matchingRate: 95,
                 sourcingPriceCNY: 85,
                 sourcingPriceKRW: 16000,
+                sourcingFeeKRW: 0,
                 exchangeRatefee: 50,
                 link: "https://taobao.com",
                 optionName: "Green / Set",
-                localShippingFeeCNY: 0,
+                localShippingFeeCNY: 4.5,
+                hsCode: "940179", // Camping chair HS Code example
+                estimatedWeight: 1.5,
             }
         ],
     },
@@ -133,7 +136,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_004",
             name: "빈티지 글라스 조명 탁상 무드등",
-            thumbnail: "https://images.unsplash.com/photo-1507473888900-52e1ad14db3d?w=200&h=200&fit=crop",
+            thumbnail: "/images/dummy/vintage-lamp.png",
             optionName: "앰버 브라운 / Type B",
             quantity: 1,
             unitPrice: 38000,
@@ -147,10 +150,11 @@ export const mockOrders: Order[] = [
                 attempt: 1,
                 status: "active",
                 productName: "Vintage Glass Lamp",
-                thumbnail: "https://images.unsplash.com/photo-1507473888900-52e1ad14db3d?w=200&h=200&fit=crop",
+                thumbnail: "/images/dummy/vintage-lamp.png",
                 matchingRate: 98,
                 sourcingPriceCNY: 45,
                 sourcingPriceKRW: 8500,
+                sourcingFeeKRW: 0,
                 exchangeRatefee: 30,
                 link: "https://tmall.com",
                 optionName: "Brown Type B",
@@ -162,8 +166,8 @@ export const mockOrders: Order[] = [
             weight: 1.2,
             shippingCost: 8500,
             inspectionPhotos: [
-                "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=200&h=200&fit=crop", // Broken glass mock
-                "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=200&h=200&fit=crop"
+                "https://placehold.co/200x200?text=Inspection+1",
+                "https://placehold.co/200x200?text=Inspection+2"
             ],
             inboundDate: format(subDays(now, 1), "yyyy-MM-dd HH:mm"),
         }
@@ -191,7 +195,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_005",
             name: "원목 캣타워 대형 캣폴",
-            thumbnail: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=200&h=200&fit=crop",
+            thumbnail: "/images/dummy/cat-tower.png",
             optionName: "5단 / 스크래쳐 추가",
             quantity: 1,
             unitPrice: 129000,
@@ -205,10 +209,11 @@ export const mockOrders: Order[] = [
                 attempt: 2,
                 status: "active",
                 productName: "Wooden Cat Tower Premium",
-                thumbnail: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=200&h=200&fit=crop",
+                thumbnail: "/images/dummy/cat-tower.png",
                 matchingRate: 98,
                 sourcingPriceCNY: 180,
                 sourcingPriceKRW: 34000,
+                sourcingFeeKRW: 0,
                 exchangeRatefee: 80,
                 link: "https://detail.tmall.com/item.htm?id=12345",
                 optionName: "5-Tier Wood",
@@ -218,10 +223,11 @@ export const mockOrders: Order[] = [
                 attempt: 1,
                 status: "cancelled",
                 productName: "Wooden Cat Tower Basic",
-                thumbnail: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=200&h=200&fit=crop",
+                thumbnail: "/images/dummy/cat-tower.png",
                 matchingRate: 92,
                 sourcingPriceCNY: 150,
                 sourcingPriceKRW: 28000,
+                sourcingFeeKRW: 0,
                 exchangeRatefee: 80,
                 link: "https://taobao.com",
                 optionName: "4-Tier Style A",
@@ -247,6 +253,54 @@ export const mockOrders: Order[] = [
             updatedAt: format(now, "yyyy-MM-dd HH:mm"),
         },
     },
+    // 6. 배송중 (결제 대기 - 상세 UI 테스트용)
+    {
+        id: "ord_shipping_pay_waiting",
+        marketOrderId: "NAVER-PAY-999",
+        marketType: "naver",
+        storeName: "네이버점",
+        orderDate: format(subDays(now, 2), "yyyy-MM-dd HH:mm"),
+        status: "결제 대기",
+        buyerName: "강결제",
+        buyerPhone: "010-8888-9999",
+        recipient: {
+            name: "강결제",
+            phone: "010-8888-9999",
+            address: "경기도 용인시 기흥구 보정로 117",
+            zipCode: "16889",
+            pccc: "P123456789012",
+            deliveryMemo: "부재 시 경비실에 맡겨주세요.",
+        },
+        product: {
+            id: "prod_pay_001",
+            name: "프리미엄 앤틱 원목 수납장 (3단 화이트)",
+            thumbnail: "https://placehold.co/200x200?text=Antique+Cabinet",
+            optionName: "화이트 / 3단",
+            quantity: 1,
+            unitPrice: 285000,
+            isAiOption: true,
+            marketLink: "https://smartstore.naver.com",
+        },
+        paymentPrice: 285000,
+        platformFee: 9800,
+        expectedSettlement: 275200,
+        sourcingHistory: [
+            {
+                attempt: 1,
+                status: "active",
+                productName: "Antique Wood Cabinet White",
+                thumbnail: "https://placehold.co/200x200?text=Antique+Cabinet",
+                matchingRate: 94,
+                sourcingPriceCNY: 450,
+                sourcingPriceKRW: 86000,
+                sourcingFeeKRW: 0,
+                exchangeRatefee: 300,
+                link: "https://taobao.com",
+                optionName: "White 3-Tier",
+                localShippingFeeCNY: 0,
+            }
+        ],
+    },
     {
         id: "ORD-20240124-0004",
         marketType: "11st",
@@ -261,7 +315,7 @@ export const mockOrders: Order[] = [
             id: "PROD-004",
             name: "[특가] 샤오미 미지아 로봇청소기 B101CN",
             optionName: "화이트 / 기본형",
-            thumbnail: "https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?q=80&w=200&h=200&fit=crop",
+            thumbnail: "/images/dummy/robot-vacuum.png",
             quantity: 1,
             unitPrice: 420000,
             isAiOption: false
@@ -290,7 +344,7 @@ export const mockOrders: Order[] = [
             id: "PROD-005",
             name: "캠핑용 경량 체어 1+1",
             optionName: "블랙 + 베이지",
-            thumbnail: "https://images.unsplash.com/photo-1503602642458-2321114458ed?q=80&w=200&h=200&fit=crop",
+            thumbnail: "/images/dummy/camping-chair.png",
             quantity: 2,
             unitPrice: 44500,
             isAiOption: true
@@ -324,7 +378,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_wait_01",
             name: "다용도 수납함 리빙박스 60L",
-            thumbnail: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&h=200&fit=crop",
+            thumbnail: "https://placehold.co/200x200?text=Living+Box",
             optionName: "투명 / 3개입",
             quantity: 1,
             unitPrice: 32000,
@@ -334,6 +388,7 @@ export const mockOrders: Order[] = [
         platformFee: 1200,
         expectedSettlement: 30800,
         sourcingHistory: [],
+        isTempInvoice: true,
     },
     {
         id: "ord_wait_02",
@@ -353,7 +408,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_wait_02",
             name: "게이밍 마우스 장패드",
-            thumbnail: "https://images.unsplash.com/photo-1615663245857-acda5b247195?w=200&h=200&fit=crop",
+            thumbnail: "https://placehold.co/200x200?text=Mouse+Pad",
             optionName: "블랙 / XXL",
             quantity: 2,
             unitPrice: 15000,
@@ -362,7 +417,25 @@ export const mockOrders: Order[] = [
         paymentPrice: 30000,
         platformFee: 900,
         expectedSettlement: 29100,
-        sourcingHistory: [],
+        sourcingHistory: [
+            {
+                attempt: 1,
+                status: 'active',
+                productName: "PVC 투명 고급 선물용 쇼핑백 (별색 배색/입체형/사각 선물 포장용)",
+                thumbnail: "https://placehold.co/200x200?text=Shopping+Bag",
+                matchingRate: 78,
+                sourcingPriceCNY: 10,
+                sourcingPriceKRW: 1904,
+                sourcingFeeKRW: 35,
+                exchangeRatefee: 30,
+                link: "https://detail.1688.com/offer/612227843614.html",
+                optionName: "투명 세로형 중 15 x 13 x 17",
+                localShippingFeeCNY: 4.5,
+                hsCode: "392690", // Plastic bag HS Code example
+                estimatedWeight: 0.5,
+            }
+        ],
+        isTempInvoice: true,
     },
     {
         id: "ord_wait_03",
@@ -382,7 +455,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_wait_03",
             name: "차량용 방향제 디퓨저",
-            thumbnail: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=200&h=200&fit=crop",
+            thumbnail: "https://placehold.co/200x200?text=Diffuser",
             optionName: "블랙체리 / 본품",
             quantity: 1,
             unitPrice: 19800,
@@ -413,7 +486,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_claim_01",
             name: "여성용 가죽 숄더백",
-            thumbnail: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=200&h=200&fit=crop",
+            thumbnail: "https://placehold.co/200x200?text=Shoulder+Bag",
             optionName: "브라운",
             quantity: 1,
             unitPrice: 89000,
@@ -442,7 +515,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_claim_02",
             name: "무선 블루투스 이어폰",
-            thumbnail: "https://images.unsplash.com/photo-1572569028738-411a5611099f?w=200&h=200&fit=crop",
+            thumbnail: "https://placehold.co/200x200?text=Earbuds",
             optionName: "화이트",
             quantity: 1,
             unitPrice: 35000,
@@ -471,7 +544,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_claim_03",
             name: "남성용 런닝화 운동화",
-            thumbnail: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop",
+            thumbnail: "https://placehold.co/200x200?text=Shoes",
             optionName: "270mm / 그레이",
             quantity: 1,
             unitPrice: 65000,
@@ -500,7 +573,7 @@ export const mockOrders: Order[] = [
         product: {
             id: "prod_claim_04",
             name: "주방용 식기 건조대",
-            thumbnail: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&h=200&fit=crop",
+            thumbnail: "https://placehold.co/200x200?text=Dish+Rack",
             optionName: "2단 / 스테인리스",
             quantity: 1,
             unitPrice: 42000,

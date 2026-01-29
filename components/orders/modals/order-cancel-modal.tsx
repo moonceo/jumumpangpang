@@ -35,39 +35,38 @@ export function OrderCancelModal({
 }: OrderCancelModalProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                    <DialogTitle>주문 취소하기</DialogTitle>
-                    <DialogDescription>
-                        마켓에 주문 취소 요청을 전송합니다.
-                    </DialogDescription>
+            <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl">
+                <DialogHeader className="p-6 pb-0">
+                    <DialogTitle className="text-lg font-bold text-slate-900">주문 취소</DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-6 py-4">
+                <div className="p-6 space-y-5">
                     {/* Order Info Box */}
-                    <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">주문번호</span>
-                            <span className="font-medium">{orderId}</span>
+                    <div className="bg-slate-50/80 rounded-xl p-4 space-y-2 text-[12px] border border-slate-100">
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-400 font-medium tracking-tight">주문번호</span>
+                            <span className="font-mono text-slate-600 font-bold">{orderId}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">마켓 주문번호</span>
-                            <span className="font-medium">{marketOrderId}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-400 font-medium tracking-tight">마켓 주문번호</span>
+                            <span className="font-mono text-slate-600 font-bold">{marketOrderId}</span>
                         </div>
-                        <div className="flex justify-between items-start gap-4">
-                            <span className="text-muted-foreground whitespace-nowrap">상품명</span>
-                            <span className="font-medium text-right truncate line-clamp-2">{productName}</span>
+                        <div className="flex justify-between items-start gap-4 pt-1 border-t border-slate-100 mt-1">
+                            <span className="text-slate-400 font-medium tracking-tight whitespace-nowrap">상품명</span>
+                            <span className="font-bold text-slate-700 text-right line-clamp-2">{productName}</span>
                         </div>
                     </div>
 
                     {/* Reason Selection */}
                     <div className="space-y-2">
-                        <Label htmlFor="cancel-reason">취소 사유 <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="cancel-reason" className="text-[12px] font-bold text-slate-700 ml-1">
+                            취소 사유 <span className="text-red-500">*</span>
+                        </Label>
                         <Select>
-                            <SelectTrigger id="cancel-reason">
+                            <SelectTrigger id="cancel-reason" className="h-10 text-[13px] border-slate-200 focus:ring-slate-400 rounded-lg bg-white/50">
                                 <SelectValue placeholder="사유를 선택해주세요" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-lg">
                                 <SelectItem value="customer_change">구매 의사 취소</SelectItem>
                                 <SelectItem value="option_change">색상 및 사이즈 변경</SelectItem>
                                 <SelectItem value="wrong_order">다른 상품 잘못 주문</SelectItem>
@@ -81,26 +80,36 @@ export function OrderCancelModal({
 
                     {/* Detailed Reason */}
                     <div className="space-y-2">
-                        <Label htmlFor="cancel-detail">상세 사유 (선택)</Label>
+                        <Label htmlFor="cancel-detail" className="text-[12px] font-bold text-slate-700 ml-1">상세 사유 (선택)</Label>
                         <Textarea
                             id="cancel-detail"
                             placeholder="추가로 전달하실 내용이 있다면 입력해주세요"
-                            className="resize-none"
+                            className="resize-none min-h-[100px] text-[13px] border-slate-200 focus:ring-slate-400 rounded-lg bg-white/50 p-3"
                         />
                     </div>
 
                     {/* Warning Box */}
-                    <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-900 p-3 rounded-md flex gap-3">
-                        <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />
-                        <p className="text-sm text-yellow-800 dark:text-yellow-400 font-medium">
-                            주문 취소 요청 후에는 되돌릴 수 없습니다. 신중하게 결정해주세요.
+                    <div className="bg-[#FFFBEB] border border-[#FEF3C7] p-4 rounded-xl flex gap-3">
+                        <AlertTriangle className="h-5 w-5 text-[#D97706] shrink-0 mt-0.5" />
+                        <p className="text-sm text-[#92400E] font-medium leading-relaxed">
+                            주문 취소 요청 후에는 되돌릴 수 없습니다. <span className="font-bold underline decoration-[#FDE68A] decoration-2 underline-offset-4">신중하게 결정해주세요.</span>
                         </p>
                     </div>
                 </div>
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>닫기</Button>
-                    <Button variant="destructive">주문 취소하기</Button>
+                <DialogFooter className="bg-slate-50/50 p-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <Button
+                        variant="ghost"
+                        onClick={() => onOpenChange(false)}
+                        className="text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 font-medium"
+                    >
+                        닫기
+                    </Button>
+                    <Button
+                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 shadow-lg shadow-slate-100 transition-all active:scale-95"
+                    >
+                        주문 취소하기
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

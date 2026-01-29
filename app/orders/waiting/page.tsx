@@ -4,89 +4,131 @@ import { OrderTable } from "@/components/orders/shared/order-table";
 import { columns as defaultColumns } from "@/components/orders/shared/columns";
 import { mockOrders } from "@/lib/mock-data/orders";
 import { OrderSearch } from "@/components/orders/shared/order-search";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RefreshCw, Truck } from "lucide-react";
-import { Order } from "@/types/order";
+import { Order, SourcingHistory } from "@/types/order";
 import { ORDER_STATUSES } from "@/lib/constants/orders";
-import { PcccInfoModal } from "@/components/orders/modals/pccc-info-modal";
+import { PCCCInfoModal } from "@/components/orders/modals/pccc-info-modal";
+import { OrderHistoryModal } from "@/components/orders/modals/order-history-modal";
+import { DirectDeliveryModal } from "@/components/orders/modals/direct-delivery-modal";
+import { SourcingPaymentModal } from "@/components/orders/modals/sourcing-payment-modal";
+import { SourcingSelectionModal } from "@/components/orders/modals/sourcing-selection-modal";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function WaitingShipmentPage() {
     const [showTempInvoiceOnly, setShowTempInvoiceOnly] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
     const [isPcccOpen, setIsPcccOpen] = useState(false);
-    const [isSourcingModalOpen, setIsSourcingModalOpen] = useState(false);
-
-    // Filter for 'Pending Shipment' status orders
-    const pendingOrders = useMemo(() => mockOrders.filter(o => ORDER_STATUSES.WAITING.includes(o.status)), []);
-    const [filteredOrders, setFilteredOrders] = useState<Order[]>(pendingOrders);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [isDirectDeliveryOpen, setIsDirectDeliveryOpen] = useState(false);
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+    const [isSourcingSelectionOpen, setIsSourcingSelectionOpen] = useState(false);
 
     const handlePcccClick = (order: Order) => {
         setSelectedOrder(order);
         setIsPcccOpen(true);
     };
 
-    // Define columns with override for recipient only
-    const pageColumns = useMemo(() => {
-        return defaultColumns.map(col => {
-            // Override Recipient
-            if ('accessorKey' in col && col.accessorKey === 'recipient') {
-                return {
-                    ...col,
-                    header: "수령자",
-                    cell: ({ row }: { row: { original: Order } }) => {
-                        const recipient = row.original.recipient;
-                        const isPccMissing = !recipient.pccc || recipient.pccc.length < 12;
+    const handleHistoryClick = (order: Order) => {
+        setSelectedOrder(order);
+        setIsHistoryOpen(true);
+    };
 
-                        const handleSendAlert = (e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            import("sonner").then(({ toast }) => {
-                                toast.success(`[${recipient.name}] 고객님에게 PCCC 요청 알림톡을 발송했습니다.`);
-                            });
-                        };
+    const handleDirectDeliveryClick = (order: Order) => {
+        setSelectedOrder(order);
+        setIsDirectDeliveryOpen(true);
+    };
 
-                        return (
-                            <div className="flex flex-col text-sm gap-0.5">
-                                <div className="font-medium">
-                                    {recipient.name}
-                                </div>
-                                <span className="text-xs text-muted-foreground">{recipient.phone}</span>
-                                <div className="mt-0.5">
-                                    {isPccMissing ? (
-                                        <div className="flex items-center gap-1">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={handleSendAlert}
-                                                className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
-                                            >
-                                                통관부호 요청
-                                            </Button>
-                                        </div>
-                                    ) : (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handlePcccClick(row.original);
-                                            }}
-                                            className="h-5 px-1.5 text-[10px] bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700"
-                                        >
-                                            통관부호 확인
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    },
-                };
-            }
-            return col;
-        });
+    const handleSourcingClick = (order: Order) => {
+        setSelectedOrder(order);
+        setIsPaymentOpen(true);
+    };
+
+    const handleSourcingManagementClick = (order: Order) => {
+        setSelectedOrder(order);
+        setIsSourcingSelectionOpen(true);
+    };
+
+    const handleMemoSave = (order: Order, memo: string) => {
+        const updatedOrder = { ...order, internalMemo: memo };
+        const index = mockOrders.findIndex(o => o.id === order.id);
+        if (index !== -1) {
+            mockOrders[index] = updatedOrder;
+        }
+        setLastFiltered(prev => prev.map(o => o.id === order.id ? updatedOrder : o));
+    };
+
+    const handleSourcingComplete = (order: Order, selectedSourcing: SourcingHistory) => {
+        // Mock update: Add the selected sourcing history to the order
+        // In a real app, this would be an API call and re-fetch
+        console.log("Sourcing completed", order.id, selectedSourcing);
+
+        // Update local state to reflect change immediately for demo
+        const updatedOrder = {
+            ...order,
+            sourcingHistory: [selectedSourcing, ...(order.sourcingHistory || [])]
+        };
+
+        // Update the mock data list (this is a hack for the demo to persist slightly)
+        const index = mockOrders.findIndex(o => o.id === order.id);
+        if (index !== -1) {
+            mockOrders[index] = updatedOrder;
+        }
+
+        // Force re-render of search results if needed
+        setLastFiltered(prev => prev.map(o => o.id === order.id ? updatedOrder : o));
+    };
+
+    useEffect(() => {
+        const handlePcccEvent = (e: Event) => {
+            const customEvent = e as CustomEvent<Order>;
+            handlePcccClick(customEvent.detail);
+        };
+        const handleDirectDeliveryEvent = (e: Event) => {
+            const customEvent = e as CustomEvent<Order>;
+            handleDirectDeliveryClick(customEvent.detail);
+        };
+        const handlePaymentEvent = (e: Event) => {
+            const customEvent = e as CustomEvent<Order>;
+            handleSourcingClick(customEvent.detail);
+        };
+
+        window.addEventListener('action-pccc-info', handlePcccEvent);
+        window.addEventListener('action-register-invoice', handleDirectDeliveryEvent);
+        window.addEventListener('action-pay-sourcing', handlePaymentEvent);
+
+        return () => {
+            window.removeEventListener('action-pccc-info', handlePcccEvent);
+            window.removeEventListener('action-register-invoice', handleDirectDeliveryEvent);
+            window.removeEventListener('action-pay-sourcing', handlePaymentEvent);
+        };
     }, []);
+
+    // Filter for 'Pending Shipment' status orders
+    const pendingOrders = useMemo(() => mockOrders.filter(o => ORDER_STATUSES.WAITING.includes(o.status)), []);
+    const [lastFiltered, setLastFiltered] = useState<Order[]>(pendingOrders);
+
+    const handleSearch = useCallback((filtered: Order[]) => {
+        setLastFiltered(filtered);
+    }, []);
+
+    const filteredOrders = useMemo(() => {
+        if (showTempInvoiceOnly) {
+            return lastFiltered.filter((o: Order) => o.isTempInvoice);
+        }
+        return lastFiltered;
+    }, [lastFiltered, showTempInvoiceOnly]);
+
+    const pageColumns = defaultColumns;
 
     return (
         <div className="space-y-6">
@@ -96,40 +138,114 @@ export default function WaitingShipmentPage() {
                         <Truck className="h-8 w-8" />
                         발송대기
                     </h1>
-                    <p className="text-muted-foreground mt-2">
-                        소싱이 완료되어 현지 발송을 대기 중이거나 진행 중인 주문입니다.
+                    <p className="text-muted-foreground mt-2 text-sm font-medium">
+                        발주가 진행중인 주문을 확인하고 발주를 진행합니다.
                     </p>
                 </div>
             </div>
 
             <OrderSearch
                 baseData={pendingOrders}
-                onSearch={setFilteredOrders}
+                onSearch={handleSearch}
                 statusOptions={ORDER_STATUSES.WAITING}
+                placeholder="마켓 주문번호, 주문 ID, 주문자, 수령인 정보, 상품명 검색"
                 action={
-                    <Button
-                        onClick={() => {
-                            import("sonner").then(({ toast }) => {
-                                toast.success("마켓 주문을 동기화하고 있습니다...", { description: "잠시만 기다려주세요." });
-                                setTimeout(() => toast.success("주문 동기화가 완료되었습니다."), 1500);
-                            });
-                        }}
-                    >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        주문 불러오기
-                    </Button>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center space-x-2 bg-background border px-3 py-1.5 rounded-md shadow-sm">
+                            <Switch
+                                id="temp-invoice"
+                                checked={showTempInvoiceOnly}
+                                onCheckedChange={setShowTempInvoiceOnly}
+                            />
+                            <Label htmlFor="temp-invoice" className="text-xs font-bold cursor-pointer whitespace-nowrap">가송장만 보기</Label>
+                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        onClick={() => {
+                                            import("sonner").then(({ toast }) => {
+                                                toast.success("마켓 주문을 동기화하고 있습니다...", { description: "잠시만 기다려주세요." });
+                                                setTimeout(() => toast.success("주문 동기화가 완료되었습니다."), 1500);
+                                            });
+                                        }}
+                                    >
+                                        <RefreshCw className="h-4 w-4 mr-2" />
+                                        주문 불러오기
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="text-xs">마지막 업데이트: 2024-03-21 14:30</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                 }
             />
 
             <Card className="p-0 overflow-hidden shadow-sm border-gray-200">
-                <OrderTable data={filteredOrders} columns={pageColumns} viewMode="WAITING" />
+                <OrderTable
+                    columns={pageColumns}
+                    data={filteredOrders}
+                    viewMode="WAITING"
+                    onHistoryClick={handleHistoryClick}
+                    onSourcingClick={handleSourcingClick}
+                    onSourcingManagementClick={handleSourcingManagementClick}
+                    onPCCClick={handlePcccClick}
+                    onTrackingClick={handleDirectDeliveryClick}
+                    onMemoSave={handleMemoSave}
+                />
             </Card>
 
-            <PcccInfoModal
-                order={selectedOrder}
-                open={isPcccOpen}
-                onOpenChange={setIsPcccOpen}
-            />
+            {/* Modals */}
+            {selectedOrder && (
+                <>
+                    <PCCCInfoModal
+                        open={isPcccOpen}
+                        onOpenChange={setIsPcccOpen}
+                        order={selectedOrder}
+                    />
+                    <OrderHistoryModal
+                        open={isHistoryOpen}
+                        onOpenChange={setIsHistoryOpen}
+                        order={selectedOrder}
+                    />
+                    <DirectDeliveryModal
+                        open={isDirectDeliveryOpen}
+                        onOpenChange={setIsDirectDeliveryOpen}
+                        order={selectedOrder}
+                        onConfirm={(order) => {
+                            import("sonner").then(({ toast }) => {
+                                toast.success("직접전달 처리가 완료되었습니다.", {
+                                    description: `주문번호: ${order.marketOrderId}`
+                                });
+                            });
+                        }}
+                    />
+                    <SourcingPaymentModal
+                        open={isPaymentOpen}
+                        onOpenChange={setIsPaymentOpen}
+                        order={selectedOrder}
+                        onComplete={(order) => {
+                            import("sonner").then(({ toast }) => {
+                                toast.success("소싱 결제가 완료되었습니다.", {
+                                    description: "배송중 단계로 이동합니다."
+                                });
+                            });
+                        }}
+                        onBack={() => {
+                            setIsPaymentOpen(false);
+                            setIsSourcingSelectionOpen(true);
+                        }}
+                    />
+                    <SourcingSelectionModal
+                        open={isSourcingSelectionOpen}
+                        onOpenChange={setIsSourcingSelectionOpen}
+                        order={selectedOrder}
+                        onComplete={handleSourcingComplete}
+                    />
+                </>
+            )}
         </div>
     );
 }

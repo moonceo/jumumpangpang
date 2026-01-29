@@ -39,7 +39,7 @@ export function TrackingModal({ order, open, onOpenChange }: TrackingModalProps)
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col gap-0 border-none">
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col gap-0 border-none">
                 <DialogHeader className="p-6 pb-4 bg-zinc-900 text-white">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">

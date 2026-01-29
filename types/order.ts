@@ -103,12 +103,15 @@ export interface SourcingHistory {
     matchingRate: number; // %
     sourcingPriceCNY: number;
     sourcingPriceKRW: number;
-    exchangeRatefee: number;
+    sourcingFeeKRW: number; // 소싱처 이용료 (e.g. ₩35)
+    exchangeRatefee: number; // 통화 환전 수수료 (e.g. ₩30)
     link: string;
     optionName: string;
 
     // Logistics
     localShippingFeeCNY: number;
+    hsCode?: string;
+    estimatedWeight?: number;
 }
 
 export interface Order {
@@ -146,6 +149,7 @@ export interface Order {
 
     // Memo
     internalMemo?: string;
+    isTempInvoice?: boolean;
 }
 
 export interface WarehouseChatMsg {

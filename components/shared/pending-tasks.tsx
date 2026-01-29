@@ -31,10 +31,7 @@ export function PendingTasks() {
                             <div className="p-2 bg-muted rounded-full">
                                 {getIcon(task.id)}
                             </div>
-                            <div className={cn(
-                                "text-2xl font-bold",
-                                task.count > 0 ? "text-foreground" : "text-muted-foreground"
-                            )}>
+                            <div className="text-2xl font-bold text-foreground">
                                 {task.count}
                                 <span className="text-sm font-normal text-muted-foreground ml-1">건</span>
                             </div>

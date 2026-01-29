@@ -10,13 +10,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    ClipboardList,
-    Warehouse,
-    User,
-    Cpu,
-    Settings,
-    ChevronRight,
-    Search
+    History,
+    Search,
+    X,
+    Circle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,129 +26,107 @@ interface OrderHistoryModalProps {
 export function OrderHistoryModal({ order, open, onOpenChange }: OrderHistoryModalProps) {
     if (!order) return null;
 
-    // Mock timeline events for demonstration
+    // Mock timeline events based on benchmark
     const events = [
         {
-            category: "배대지",
-            icon: <Warehouse className="h-3 w-3" />,
-            color: "text-orange-500 bg-orange-50",
-            title: "국제 배송 시작",
-            date: "3월 3일 14:20",
-            details: "출발지: 중국도 -> 배송대행지 | 송장: Z4357046134342"
+            actor: "리펀디 AI",
+            time: "약 3시간 전",
+            title: "통관부호 입력 링크 생성",
+            details: [
+                { label: "링크 토큰", value: "E9BC.AIW" }
+            ],
+            type: "system"
         },
         {
-            category: "배대지",
-            icon: <Warehouse className="h-3 w-3" />,
-            color: "text-orange-500 bg-orange-50",
-            title: "검수 완료",
-            date: "2월 28일 09:15",
-            details: "사진 8장 업로드 완료 | 검수 결과: 정상"
+            actor: "리펀디 AI",
+            time: "약 3시간 전",
+            title: "주문 수집 완료",
+            details: [
+                { label: "마켓", value: "네이버 스마트스토어" },
+                { label: "마켓 주문번호", value: order.marketOrderId }
+            ],
+            type: "system"
         },
         {
-            category: "시스템",
-            icon: <Settings className="h-3 w-3" />,
-            color: "text-slate-500 bg-slate-50",
-            title: "자동 결제 시도",
-            date: "2월 28일 09:00",
-            details: "배송비 결제 (카드: ****-1234) | 성공"
-        },
-        {
-            category: "배대지",
-            icon: <Warehouse className="h-3 w-3" />,
-            color: "text-orange-500 bg-orange-50",
-            title: "입고 완료 (무게측정)",
-            date: "2월 28일 08:50",
-            details: "실무게: 1.8kg | 부피무게: 2.0kg"
-        },
-        {
-            category: "배대지",
-            icon: <Warehouse className="h-3 w-3" />,
-            color: "text-orange-500 bg-orange-50",
-            title: "배대지 도착",
-            date: "2월 28일 08:30",
-            details: "중국 내 배송완료 -> 배대지 도착 확인"
-        },
-        {
-            category: "주문팡팡 AI",
-            icon: <Cpu className="h-3 w-3" />,
-            color: "text-purple-500 bg-purple-50",
-            title: "송장 자동 매칭",
-            date: "2월 26일 14:00",
-            details: "트래킹번호 자동 감지: YTO Express 12345678"
-        },
-        {
-            category: "셀러",
-            icon: <User className="h-3 w-3" />,
-            color: "text-blue-500 bg-blue-50",
-            title: "중국 내 발송",
-            date: "2월 26일 10:00",
-            details: "판매자가 상품을 발송했습니다."
-        },
-        {
-            category: "셀러",
-            icon: <User className="h-3 w-3" />,
-            color: "text-blue-500 bg-blue-50",
-            title: "발주 확인",
-            date: "2월 25일 18:00",
-            details: "판매자가 주문을 확인했습니다."
-        },
-        {
-            category: "시스템",
-            icon: <Settings className="h-3 w-3" />,
-            color: "text-slate-500 bg-slate-50",
-            title: "마켓 주문 수집",
-            date: "2월 25일 17:30",
-            details: "네이버 스마트스토어로부터 주문 데이터 정상 수집 완료"
+            actor: "마켓",
+            time: "약 3시간 전",
+            title: "주문 생성됨",
+            details: [
+                { label: "마켓", value: "네이버 스마트스토어" },
+                { label: "마켓 주문번호", value: order.marketOrderId },
+                { label: "주문번호", value: order.id },
+                { label: "상품 수", value: "1" }
+            ],
+            type: "market"
         }
     ];
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-xl max-h-[80vh] p-0 flex flex-col">
-                <DialogHeader className="p-6 border-b flex flex-row items-center justify-between">
-                    <div className="space-y-1">
-                        <DialogTitle className="text-lg flex items-center gap-2">
-                            <ClipboardList className="h-5 w-5 text-slate-500" />
-                            주문 히스토리
-                        </DialogTitle>
-                        <p className="text-xs text-muted-foreground">총 33개의 이벤트가 기록되었습니다.</p>
-                    </div>
-                    <div className="relative w-40">
-                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-                        <input className="w-full h-8 pl-7 pr-2 text-[10px] border rounded bg-muted/20 outline-none" placeholder="로그 검색..." />
+            <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl h-[70vh] flex flex-col">
+                <DialogHeader className="p-6 border-b border-slate-100 shrink-0">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <DialogTitle className="text-lg font-bold text-slate-900">주문 히스토리</DialogTitle>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-slate-400 font-mono">주문번호: {order.id}</span>
+                                <span className="text-slate-200">|</span>
+                                <span className="text-[11px] text-slate-400 font-bold">총 {events.length}개 이벤트</span>
+                            </div>
+                        </div>
                     </div>
                 </DialogHeader>
 
-                <ScrollArea className="flex-1 p-6">
-                    <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-                        {events.map((event, idx) => (
-                            <div key={idx} className="relative flex items-start gap-6 group">
-                                <div className={cn(
-                                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border shadow-sm z-10 transition-transform group-hover:scale-110",
-                                    event.color
-                                )}>
-                                    {event.icon}
-                                </div>
-                                <div className="flex-1 space-y-1 pt-0.5">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{event.category}</span>
-                                            <Badge variant="outline" className="text-[9px] h-3.5 px-1 font-normal opacity-50">#ID-{1000 + idx}</Badge>
-                                        </div>
-                                        <span className="text-[10px] text-muted-foreground tabular-nums">{event.date}</span>
+                <div className="flex-1 overflow-hidden bg-white">
+                    <ScrollArea className="h-full px-6 py-8">
+                        <div className="relative space-y-10 before:absolute before:inset-0 before:left-3 before:h-full before:w-[1.5px] before:bg-slate-100">
+                            {events.map((event, idx) => (
+                                <div key={idx} className="relative flex gap-6">
+                                    {/* Timeline Marker */}
+                                    <div className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white border-2 border-slate-200 shadow-sm">
+                                        <div className={cn(
+                                            "h-2 w-2 rounded-full",
+                                            event.type === 'system' ? "bg-blue-500" : "bg-slate-400"
+                                        )} />
                                     </div>
-                                    <h4 className="text-sm font-bold">{event.title}</h4>
-                                    <div className="bg-muted/30 p-2.5 rounded border border-dashed text-xs text-muted-foreground leading-relaxed">
-                                        {event.details}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </ScrollArea>
 
-                <div className="p-4 border-t bg-slate-50 text-center">
-                    <p className="text-[10px] text-muted-foreground">모든 시스템 작업과 사용자 피드백은 기록 후 1년간 보관됩니다.</p>
+                                    {/* Event Card */}
+                                    <div className="flex-1 space-y-2 pb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[11px] font-bold text-slate-700">{event.actor}</span>
+                                            <span className="text-[10px] text-slate-300 font-medium">약 3시간 전</span>
+                                        </div>
+
+                                        <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-100/60 shadow-sm space-y-2">
+                                            <h4 className="text-[13px] font-bold text-slate-800 break-all leading-tight">
+                                                {event.title}
+                                            </h4>
+
+                                            {event.details && event.details.length > 0 && (
+                                                <div className="space-y-1.5 pt-1 border-t border-slate-200/50">
+                                                    {event.details.map((detail, dIdx) => (
+                                                        <div key={dIdx} className="flex gap-2 text-[11px]">
+                                                            <span className="text-slate-400 font-medium shrink-0 min-w-[70px]">{detail.label}</span>
+                                                            <span className="text-slate-600 font-bold break-all">{detail.value}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Start Anchor */}
+                            <div className="absolute bottom-0 left-[11px] h-2 w-2 border-2 border-slate-200 bg-white rounded-full -mb-2" />
+                        </div>
+                    </ScrollArea>
+                </div>
+
+                <div className="p-4 border-t bg-slate-50/50 text-center shrink-0">
+                    <p className="text-[10px] text-slate-400 font-medium">
+                        모든 시스템 로그는 기록 시점으로부터 1년간 안전하게 보관됩니다.
+                    </p>
                 </div>
             </DialogContent>
         </Dialog>

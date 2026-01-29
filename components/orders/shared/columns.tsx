@@ -16,6 +16,7 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { ORDER_STATUSES } from "@/lib/constants/orders";
 
 // Helper for status badge colors
 const getStatusBadgeVariant = (status: string) => {
@@ -79,16 +80,14 @@ const getMarketIcon = (market: string) => {
 // Actions -> OrderDate -> Product -> Status -> Recipient -> Price -> Market -> Memo.
 
 export const columns: ColumnDef<Order>[] = [
-    // ... (select, expander columns remain same)
     {
         id: "select",
-        // ... (existing code)
         header: ({ table }) => (
             <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
                 onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                 aria-label="Select all"
-                className="translate-y-[2px]"
+                className="translate-y-[2px] border-zinc-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
             />
         ),
         cell: ({ row }) => (
@@ -96,7 +95,8 @@ export const columns: ColumnDef<Order>[] = [
                 checked={row.getIsSelected()}
                 onCheckedChange={(value) => row.toggleSelected(!!value)}
                 aria-label="Select row"
-                className="translate-y-[2px]"
+                className="translate-y-[2px] border-zinc-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                onClick={(e) => e.stopPropagation()}
             />
         ),
         enableSorting: false,
@@ -111,7 +111,10 @@ export const columns: ColumnDef<Order>[] = [
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 p-0 hover:bg-muted"
-                    onClick={() => row.toggleExpanded()}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        row.toggleExpanded();
+                    }}
                 >
                     {row.getIsExpanded() ? (
                         <ChevronDown className="h-4 w-4" />
@@ -134,7 +137,7 @@ export const columns: ColumnDef<Order>[] = [
                 return (
                     <div className="flex flex-col gap-1 w-full max-w-[150px]">
                         <Button
-                            className="h-7 text-[11px] w-full bg-[#18181b] text-white hover:bg-[#27272a] rounded-md shadow-sm border border-zinc-800"
+                            className="h-8 text-[11px] w-full bg-[#18181b] text-white hover:bg-zinc-800 rounded-md shadow-sm"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.dispatchEvent(new CustomEvent('action-tracking-input', { detail: row.original }));
@@ -144,7 +147,7 @@ export const columns: ColumnDef<Order>[] = [
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-7 text-[11px] w-full bg-white hover:bg-zinc-50 border-zinc-300 text-zinc-700 rounded-md shadow-sm"
+                            className="h-8 text-[11px] w-full bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-700 rounded-md"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.dispatchEvent(new CustomEvent('action-review-margin', { detail: row.original }));
@@ -153,8 +156,8 @@ export const columns: ColumnDef<Order>[] = [
                             마진 검토하기
                         </Button>
                         <Button
-                            variant="outline"
-                            className="h-7 text-[11px] w-full bg-white hover:bg-red-50 border-zinc-300 text-red-600 rounded-md shadow-sm"
+                            variant="ghost"
+                            className="h-8 text-[11px] w-full text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.dispatchEvent(new CustomEvent('action-cancel-order', { detail: row.original }));
@@ -167,11 +170,11 @@ export const columns: ColumnDef<Order>[] = [
             }
 
             // 2. 발송 대기 Actions
-            if (status === '발송대기') {
+            if (ORDER_STATUSES.WAITING.includes(status)) {
                 return (
-                    <div className="flex flex-col gap-1.5 w-full max-w-[150px]">
+                    <div className="flex flex-col gap-1 w-full max-w-[150px]">
                         <Button
-                            className="h-7 text-[11px] w-full bg-[#18181b] text-white hover:bg-[#27272a] rounded-md shadow-sm border border-zinc-800"
+                            className="h-8 text-[11px] w-full bg-[#18181b] text-white hover:bg-zinc-800"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.dispatchEvent(new CustomEvent('action-register-invoice', { detail: row.original }));
@@ -180,13 +183,13 @@ export const columns: ColumnDef<Order>[] = [
                             직접전달 처리하기
                         </Button>
                         <Button
-                            className="h-7 text-[11px] w-full bg-[#18181b] text-white hover:bg-[#27272a] rounded-md shadow-sm border border-zinc-800"
+                            className="h-8 text-[11px] w-full bg-[#18181b] text-white hover:bg-zinc-800 rounded-md shadow-sm"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                window.dispatchEvent(new CustomEvent('action-register-sourcing', { detail: row.original }));
+                                window.dispatchEvent(new CustomEvent('action-pay-sourcing', { detail: row.original }));
                             }}
                         >
-                            소싱상품 등록하기
+                            결제하기
                         </Button>
                     </div>
                 );
@@ -200,13 +203,12 @@ export const columns: ColumnDef<Order>[] = [
                     <div className="flex flex-col gap-1 w-full max-w-[140px]">
                         {status === '국내 배송중' && (
                             <Button
-                                className="h-7 text-[10px] w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm"
+                                className="h-7 text-[10px] w-full bg-[#18181b] hover:bg-zinc-800 text-white rounded-md shadow-sm flex items-center justify-center"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     window.dispatchEvent(new CustomEvent('action-check-tracking', { detail: row.original }));
                                 }}
                             >
-                                <Truck className="h-3 w-3 mr-1" />
                                 국내 송장 확인
                             </Button>
                         )}
@@ -235,15 +237,18 @@ export const columns: ColumnDef<Order>[] = [
         accessorKey: "orderDate",
         header: "주문일시",
         cell: ({ row }) => {
-            const date = new Date(row.original.orderDate);
-            const relativeTime = formatDistanceToNow(date, { addSuffix: true, locale: ko });
+            const dateStr = row.original.orderDate; // e.g., "2024-03-21 14:30"
+            const [date, time] = dateStr.includes(' ') ? dateStr.split(' ') : [dateStr, ''];
+            const orderDateTime = new Date(dateStr.replace(/-/g, '/')); // For Safari compatibility
 
             return (
                 <div className="flex flex-col text-xs text-muted-foreground whitespace-nowrap">
-                    <span className="font-medium text-foreground">{row.original.orderDate.split(' ')[0]}</span>
+                    <span className="font-medium text-foreground">{date}</span>
                     <div className="flex items-center gap-1">
-                        <span>{row.original.orderDate.split(' ')[1]}</span>
-                        <span className="text-[10px] opacity-70">({relativeTime})</span>
+                        <span>{time}</span>
+                        {orderDateTime && !isNaN(orderDateTime.getTime()) && (
+                            <span className="text-[10px] opacity-70">({formatDistanceToNow(orderDateTime, { addSuffix: true, locale: ko })})</span>
+                        )}
                     </div>
                 </div>
             );
@@ -255,27 +260,32 @@ export const columns: ColumnDef<Order>[] = [
         cell: ({ row }) => {
             const product = row.original.product;
             return (
-                <div className="flex items-center gap-3 min-w-[300px]">
-                    <div className="relative h-10 w-10 flex-shrink-0 rounded overflow-hidden border">
-                        <Image src={product.thumbnail} alt={product.name} fill sizes="40px" className="object-cover" />
-                        {product.isAiOption && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-blue-600/90 text-[7px] text-white text-center py-0.5 leading-none">
-                                AI 옵션 이미지
+                <div className="flex flex-col gap-1 py-1">
+                    <div className="flex items-center gap-3 min-w-[300px]">
+                        <div className="relative h-12 w-12 flex-shrink-0 rounded bg-white border border-gray-100 overflow-hidden">
+                            <Image src={product.thumbnail} alt={product.name} fill sizes="48px" className="object-cover" />
+                            {product.isAiOption && (
+                                <div className="absolute bottom-0 left-0 right-0 bg-blue-600/90 text-[7px] text-white text-center py-0.5 leading-none">
+                                    AI 옵션 이미지
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-0.5 overflow-hidden">
+                            <a href={product.marketLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 group">
+                                <span className="text-[13px] font-medium leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors" title={product.name}>
+                                    {product.name}
+                                </span>
+                                {product.marketLink && (
+                                    <ExternalLink className="h-3 w-3 text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0" />
+                                )}
+                            </a>
+                            <div className="text-[11px] text-slate-400 mt-0.5">
+                                {product.optionName}
                             </div>
-                        )}
+                        </div>
                     </div>
-                    <div className="flex flex-col gap-0.5 overflow-hidden">
-                        <span className="text-sm font-medium truncate max-w-[300px]" title={product.name}>
-                            {product.name}
-                        </span>
-                        <div className="text-xs text-muted-foreground truncate max-w-[300px]">
-                            {product.optionName}
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-muted-foreground">
-                                마켓 주문번호: {row.original.marketOrderId}
-                            </span>
-                        </div>
+                    <div className="text-[10px] text-slate-400 ml-[60px]">
+                        마켓 주문번호: {row.original.marketOrderId}
                     </div>
                 </div>
             );
@@ -287,7 +297,7 @@ export const columns: ColumnDef<Order>[] = [
         cell: ({ row }) => {
             const status = row.original.status;
             return (
-                <Badge variant="outline" className={`whitespace-nowrap ${getStatusColorClass(status)} border`}>
+                <Badge variant="outline" className={cn("whitespace-nowrap border font-medium", getStatusColorClass(status))}>
                     {status}
                 </Badge>
             );
@@ -302,31 +312,29 @@ export const columns: ColumnDef<Order>[] = [
             const isPccMissing = !recipient.pccc || recipient.pccc.length < 12;
 
             return (
-                <div className="flex flex-col text-sm gap-0.5 min-w-[100px]">
-                    <div className="font-medium whitespace-nowrap">
+                <div className="flex flex-col text-sm gap-0.5 min-w-[120px]">
+                    <div className="font-medium whitespace-nowrap text-slate-900">
                         {recipient.name}
                     </div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">{recipient.phone}</span>
-                    <div className="mt-1 flex items-center">
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="cursor-pointer">
-                                        {isPccMissing ? (
-                                            <AlertCircle className="h-4 w-4 text-red-500 hover:text-red-600" />
-                                        ) : (
-                                            <CheckCircle2 className="h-4 w-4 text-green-500 hover:text-green-600" />
-                                        )}
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="text-xs">
-                                        PCCC: {recipient.pccc || '미입력'}
-                                        {isPccMissing && ' (수정필요)'}
-                                    </p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                    <span className="text-xs text-slate-400 whitespace-nowrap font-mono">{recipient.phone}</span>
+                    <div
+                        className="mt-1 flex items-center gap-1 cursor-pointer group/pccc"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            window.dispatchEvent(new CustomEvent('action-pccc-info', { detail: row.original }));
+                        }}
+                    >
+                        {isPccMissing ? (
+                            <div className="flex items-center gap-1 bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full text-[10px] border border-red-100 font-medium group-hover/pccc:bg-red-100 transition-colors">
+                                <AlertCircle className="h-3 w-3" />
+                                <span>통관부호 요청</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-1 bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full text-[10px] border border-green-100 font-medium group-hover/pccc:bg-green-100 transition-colors">
+                                <CheckCircle2 className="h-3 w-3 fill-green-600 text-white" />
+                                <span>통관부호 확인</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -338,25 +346,26 @@ export const columns: ColumnDef<Order>[] = [
         cell: ({ row }) => {
             const price = row.original.paymentPrice;
             const settlement = row.original.expectedSettlement;
-            const quantity = row.original.product.quantity;
 
-            // Calculate margin rate based on settlement (revenue after platform fee) vs something.
-            // Documentation says: 판매가 - (매입가 + 배송비 + 마켓수수료)
-            // For now, let's use (Settlement - SourcingPrice - WarehouseCost) / Settlement if we have it.
-            // If we don't have all data, show a mock margin based on settlement/price.
-            const marginRate = price > 0 ? ((settlement - (price * 0.7)) / price) * 100 : 0; // Mock calculation
+            // Mock calculations based on benchmark style
+            const marginRate = price > 0 ? ((settlement - (price * 0.7)) / price) * 100 : 34.4;
+            const minMargin = marginRate;
+            const maxMargin = marginRate + 28.0; // Mocking a range
             const isNegative = marginRate < 0;
 
             return (
                 <div className="flex flex-col text-xs gap-0.5 whitespace-nowrap">
-                    <div className="font-bold text-sm text-foreground">
+                    <div className="font-bold text-sm text-slate-900">
                         {new Intl.NumberFormat('ko-KR').format(price)}원
                     </div>
                     <div className={cn(
                         "text-[10px] font-medium flex items-center gap-1",
                         isNegative ? "text-red-500" : "text-green-600"
                     )}>
-                        {isNegative ? "▼" : "▲"} {Math.abs(marginRate).toFixed(1)}%
+                        예상: {isNegative ? "-" : "+"}{Math.abs(marginRate).toFixed(1)}%
+                    </div>
+                    <div className="text-[9px] text-slate-400">
+                        범위: +{minMargin.toFixed(0)}% ~ +{maxMargin.toFixed(0)}%
                     </div>
                 </div>
             );
@@ -366,10 +375,13 @@ export const columns: ColumnDef<Order>[] = [
         accessorKey: "marketType",
         header: "마켓",
         cell: ({ row }) => {
+            const marketType = row.original.marketType;
+            const storeName = row.original.storeName;
+
             return (
-                <div className="flex flex-col items-start gap-1">
-                    {getMarketIcon(row.original.marketType)}
-                    <span className="text-xs font-medium">{row.original.storeName}</span>
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                    {getMarketIcon(marketType)}
+                    <span className="text-[10px] text-slate-500 font-medium">{storeName}</span>
                 </div>
             );
         },
@@ -383,22 +395,24 @@ export const columns: ColumnDef<Order>[] = [
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1.5 cursor-help min-w-[80px]">
+                            <div className="flex items-center gap-1.5 cursor-help w-[100px]">
                                 <StickyNote
                                     className={cn(
                                         "h-3.5 w-3.5 transition-colors shrink-0",
-                                        memo ? "text-blue-500 fill-blue-50" : "text-muted-foreground/30"
+                                        memo ? "text-blue-500 fill-blue-50" : "text-slate-200"
                                     )}
                                 />
-                                {memo && (
-                                    <span className="text-[10px] text-muted-foreground truncate max-w-[60px]">
+                                {memo ? (
+                                    <span className="text-[11px] text-slate-600 truncate leading-relaxed">
                                         {memo}
                                     </span>
+                                ) : (
+                                    <span className="text-[11px] text-slate-300 italic">메모 없음</span>
                                 )}
                             </div>
                         </TooltipTrigger>
                         {memo && (
-                            <TooltipContent side="left" className="max-w-[200px] break-all">
+                            <TooltipContent side="left" className="max-w-[250px] break-all">
                                 <p className="text-[11px] leading-relaxed">{memo}</p>
                             </TooltipContent>
                         )}

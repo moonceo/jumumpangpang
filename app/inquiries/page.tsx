@@ -19,6 +19,12 @@ import { mockInquiries, mockInquiryStats } from "@/lib/mock-data/inquiries";
 import { Inquiry } from "@/types/inquiry";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function InquiriesPage() {
     const [activeTab, setActiveTab] = useState("waiting");
@@ -112,18 +118,24 @@ export default function InquiriesPage() {
             {/* 3. Control Bar */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white dark:bg-zinc-900 p-4 rounded-lg border shadow-sm">
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <Button
-                        variant={isSyncing ? "secondary" : "default"}
-                        onClick={handleSync}
-                        disabled={isSyncing}
-                        className="min-w-[140px]"
-                    >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                        {isSyncing ? "동기화 중..." : "문의 불러오기"}
-                    </Button>
-                    <span className="text-xs text-muted-foreground hidden sm:inline ml-2">
-                        마지막 업데이트: 방금 전
-                    </span>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant={isSyncing ? "secondary" : "default"}
+                                    onClick={handleSync}
+                                    disabled={isSyncing}
+                                    className="min-w-[140px]"
+                                >
+                                    <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                                    {isSyncing ? "동기화 중..." : "문의 불러오기"}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-xs">마지막 업데이트: 방금 전</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">

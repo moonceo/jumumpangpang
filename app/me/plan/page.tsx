@@ -6,8 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Check, CreditCard, Plus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { CardRegistrationModal } from "@/components/me/modals/card-registration-modal";
+import { useState } from "react";
 
 export default function PlanPage() {
+    const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+
     const currentPlan = {
         name: "Standard",
         price: 39000,
@@ -100,7 +104,7 @@ export default function PlanPage() {
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info("카드 등록 모달 오픈")}>
+                        <Button variant="outline" className="w-full" onClick={() => setIsCardModalOpen(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             새 카드 추가하기
                         </Button>
@@ -144,6 +148,11 @@ export default function PlanPage() {
                     </Table>
                 </div>
             </div>
+
+            <CardRegistrationModal
+                open={isCardModalOpen}
+                onOpenChange={setIsCardModalOpen}
+            />
         </div>
     );
 }
