@@ -503,32 +503,50 @@ export function ExpandableRowContent({
                                         <div className="space-y-3">
                                             <div className="flex items-center justify-between">
                                                 <h6 className="text-[11px] font-bold text-sky-600 uppercase tracking-wider">AI 예상 마진</h6>
-                                                <span className="text-[11px] font-bold text-sky-600">범위: 34% ~ 62%</span>
+                                                <span className="text-[11px] font-bold text-sky-600">
+                                                    적용된 무게: {order.warehouse?.weight || 0.2}kg
+                                                </span>
                                             </div>
-                                            <div className="space-y-1.5 text-[11px]">
-                                                <div className="flex justify-between text-slate-600">
-                                                    <span className="flex items-center gap-1">(+) 정산예상 금액</span>
-                                                    <span className="font-mono">₩{order.expectedSettlement.toLocaleString()}</span>
-                                                </div>
-                                                <div className="flex justify-between text-slate-600">
-                                                    <span className="flex items-center gap-1">(-) 소싱상품 금액</span>
-                                                    <span className="font-mono">₩3,605</span>
-                                                </div>
-                                                <div className="flex justify-between text-slate-600">
-                                                    <span className="flex items-center gap-1">(-) 배대지 비용</span>
-                                                    <span className="font-mono">₩5,000</span>
-                                                </div>
-                                            </div>
-                                            <div className="pt-2 mt-2 border-t border-sky-100 flex justify-between items-baseline">
-                                                <div className="space-y-1">
-                                                    <span className="text-[11px] font-bold text-sky-700 block">순이익</span>
-                                                    <span className="text-[10px] font-bold text-sky-600 block">마진율</span>
-                                                </div>
-                                                <div className="text-right space-y-0.5">
-                                                    <div className="text-base font-bold text-sky-700 font-mono leading-none">₩4,513</div>
-                                                    <div className="text-[11px] font-bold text-sky-600 leading-none">34.4%</div>
-                                                </div>
-                                            </div>
+                                            {(() => {
+                                                const currentWeight = order.warehouse?.weight || 0.2;
+                                                const shippingCost = 5000 + Math.max(0, currentWeight - 0.2) * 5000;
+                                                const sourcingPrice = order.warehouse?.shippingCost || 3605;
+                                                const profit = order.expectedSettlement - sourcingPrice - shippingCost;
+                                                const marginRate = (profit / order.paymentPrice) * 100;
+
+                                                return (
+                                                    <>
+                                                        <div className="space-y-1.5 text-[11px]">
+                                                            <div className="flex justify-between text-slate-600">
+                                                                <span className="flex items-center gap-1">(+) 정산예상 금액</span>
+                                                                <span className="font-mono">₩{order.expectedSettlement.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-slate-600">
+                                                                <span className="flex items-center gap-1">(-) 소싱상품 금액</span>
+                                                                <span className="font-mono">₩{sourcingPrice.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-slate-600">
+                                                                <span className="flex items-center gap-1">(-) 배대지 예상비용</span>
+                                                                <span className="font-mono">₩{shippingCost.toLocaleString()}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="pt-2 mt-2 border-t border-sky-100 flex justify-between items-baseline">
+                                                            <div className="space-y-1">
+                                                                <span className="text-[11px] font-bold text-sky-700 block">순이익</span>
+                                                                <span className="text-[10px] font-bold text-sky-600 block">마진율</span>
+                                                            </div>
+                                                            <div className="text-right space-y-0.5">
+                                                                <div className="text-base font-bold text-sky-700 font-mono leading-none">
+                                                                    ₩{profit.toLocaleString()}
+                                                                </div>
+                                                                <div className="text-[11px] font-bold text-sky-600 leading-none">
+                                                                    {marginRate.toFixed(1)}%
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </Card>
                                 )

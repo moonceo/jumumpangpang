@@ -38,7 +38,7 @@ export function PCCCInfoModal({ order, open, onOpenChange }: PCCCInfoModalProps)
         toast.success("링크가 클립보드에 복사되었습니다.");
     };
 
-    const shareLink = `https://oms.refundy.co/forms/customs/${order.id}?token=EB8CJIUM`;
+    const shareLink = `https://oms.jumumpangpang.co/forms/customs/${order.id}?token=EB8CJIUM`;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

@@ -134,11 +134,11 @@ export default function WaitingShipmentPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
-                        <Truck className="h-8 w-8" />
+                    <h1 className="text-3xl font-black tracking-tighter text-slate-900 flex items-center gap-3">
+                        <Truck className="h-8 w-8 text-violet-600" />
                         발송대기
                     </h1>
-                    <p className="text-muted-foreground mt-2 text-sm font-medium">
+                    <p className="text-slate-500 mt-1 text-sm font-medium">
                         발주가 진행중인 주문을 확인하고 발주를 진행합니다.
                     </p>
                 </div>
@@ -151,18 +151,21 @@ export default function WaitingShipmentPage() {
                 placeholder="마켓 주문번호, 주문 ID, 주문자, 수령인 정보, 상품명 검색"
                 action={
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center space-x-2 bg-background border px-3 py-1.5 rounded-md shadow-sm">
+                        <div className="flex items-center space-x-3 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl shadow-sm">
                             <Switch
                                 id="temp-invoice"
                                 checked={showTempInvoiceOnly}
                                 onCheckedChange={setShowTempInvoiceOnly}
+                                className="data-[state=checked]:bg-violet-600"
                             />
-                            <Label htmlFor="temp-invoice" className="text-xs font-bold cursor-pointer whitespace-nowrap">가송장만 보기</Label>
+                            <Label htmlFor="temp-invoice" className="text-xs font-black text-slate-700 cursor-pointer whitespace-nowrap">가송장만 보기</Label>
                         </div>
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button
+                                        variant="outline"
+                                        className="h-10 px-4 font-black border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl shadow-sm"
                                         onClick={() => {
                                             import("sonner").then(({ toast }) => {
                                                 toast.success("마켓 주문을 동기화하고 있습니다...", { description: "잠시만 기다려주세요." });
@@ -170,7 +173,7 @@ export default function WaitingShipmentPage() {
                                             });
                                         }}
                                     >
-                                        <RefreshCw className="h-4 w-4 mr-2" />
+                                        <RefreshCw className="h-4 w-4 mr-2 text-violet-600" />
                                         주문 불러오기
                                     </Button>
                                 </TooltipTrigger>

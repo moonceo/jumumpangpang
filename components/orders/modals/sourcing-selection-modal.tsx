@@ -167,7 +167,7 @@ export function SourcingSelectionModal({ open, onOpenChange, order, onComplete }
                                 <ArrowRight className="h-3 w-3 text-white/20" />
                                 <span className={step === 2 ? "text-blue-400" : "text-white/40"}>02 최종 확인</span>
                             </div>
-                            <Badge className="bg-blue-600 px-3 py-1 text-[10px] font-black italic">Refundy AI Engine v2.0</Badge>
+                            <Badge className="bg-blue-600 px-3 py-1 text-[10px] font-black italic">Jumumpangpang AI Engine v2.0</Badge>
                         </div>
                     </div>
                 </DialogHeader>
@@ -311,7 +311,7 @@ export function SourcingSelectionModal({ open, onOpenChange, order, onComplete }
                                                     </div>
                                                     <div className="flex justify-between text-[12px] pt-1 mt-1 border-t border-slate-100">
                                                         <span className="font-black text-slate-900">소싱 총비용</span>
-                                                        <span className="font-black text-slate-900">₩{((item.sourcingPriceKRW) + (item.sourcingFeeKRW || 0) + (item.exchangeRatefee || 0) + 933).toLocaleString()}</span>
+                                                        <span className="font-black text-slate-900">₩{((item.sourcingPriceKRW) + (item.sourcingFeeKRW || 35) + (item.exchangeRatefee || 31) + 933).toLocaleString()}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -324,83 +324,79 @@ export function SourcingSelectionModal({ open, onOpenChange, order, onComplete }
                                 <div className="p-4 border-b border-slate-100 bg-slate-50/30 shrink-0">
                                     <h3 className="text-[12px] font-bold text-slate-800 tracking-tight uppercase">최종 확인</h3>
                                 </div>
-                                <div className="flex-1 overflow-y-auto p-8 space-y-10">
-                                    <section className="space-y-4 max-w-2xl">
-                                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">마진 분석</h4>
-                                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-2xl space-y-8">
-                                            <div className="flex justify-between items-center">
-                                                <div className="space-y-1">
-                                                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">최종 예상 마진율</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-5xl font-black tracking-tighter">17.9%</span>
-                                                        <Badge className="bg-emerald-500 text-white border-none py-1 px-3">수익성 확보</Badge>
+                                <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                    {/* Margin Analysis Section */}
+                                    <section className="space-y-4 max-w-4xl">
+                                        <h4 className="text-[12px] font-bold text-slate-800">마진 분석</h4>
+                                        <div className="border border-slate-100 rounded-xl overflow-hidden shadow-sm">
+                                            <div className="grid grid-cols-[1fr_200px] bg-white text-[13px]">
+                                                <div className="p-4 border-r border-slate-100 space-y-3">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-slate-500">정산예상금액</span>
+                                                        <span className="font-bold text-slate-900">₩{order.expectedSettlement.toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="space-y-1.5 pl-3 border-l-2 border-slate-50">
+                                                        <div className="flex justify-between items-center text-slate-400 text-[12px]">
+                                                            <span>- 상품 금액 (최대 할인 적용 시)</span>
+                                                            <span>-₩{selectedItem ? (selectedItem.sourcingPriceKRW * order.product.quantity).toLocaleString() : "0"}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center text-slate-400 text-[12px]">
+                                                            <span>- 소싱처 이용료</span>
+                                                            <span>-₩{selectedItem?.sourcingFeeKRW || 35}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center text-slate-400 text-[12px]">
+                                                            <span>- 통화 환전 수수료</span>
+                                                            <span>-₩{selectedItem?.exchangeRatefee || 31}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center text-slate-400 text-[12px]">
+                                                            <span>- 중국내 배송비</span>
+                                                            <span>-₩933 (¥4.50)</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center text-slate-400 text-[12px]">
+                                                            <span>- 배송대행지 운임료 (예상)</span>
+                                                            <span>-₩{(5000 + Math.max(0, (selectedItem?.estimatedWeight || 0.2) - 0.2) * 5000).toLocaleString()}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-right space-y-1">
-                                                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">순이익</span>
-                                                    <p className="text-3xl font-black text-emerald-400">+₩1,359</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden p-1 backdrop-blur-sm">
-                                                    <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full w-[17.9%]" />
-                                                </div>
-                                                <div className="flex justify-between text-[10px] text-slate-500 font-bold px-1">
-                                                    <span>0%</span>
-                                                    <span>50%</span>
-                                                    <span>100%</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-8 pt-8 border-t border-white/5">
-                                                <div className="space-y-3">
-                                                    <div className="flex justify-between text-xs text-slate-400">
-                                                        <span>정산예상금액</span>
-                                                        <span className="text-white font-bold">{order.expectedSettlement.toLocaleString()}원</span>
+                                                <div className="p-6 bg-slate-50/50 flex flex-col justify-center items-end space-y-4">
+                                                    <div className="text-right">
+                                                        <p className="text-[11px] font-bold text-slate-400 uppercase mb-1">예상 순이익</p>
+                                                        <p className="text-2xl font-black text-slate-900">₩1,359</p>
                                                     </div>
-                                                    <div className="flex justify-between text-xs text-slate-400">
-                                                        <span>소싱 총비용</span>
-                                                        <span className="text-white font-bold">-{((selectedItem.sourcingPriceKRW * order.product.quantity) + selectedItem.sourcingFeeKRW + selectedItem.exchangeRatefee + 933).toLocaleString()}원</span>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-3">
-                                                    <div className="flex justify-between text-xs text-slate-400">
-                                                        <span>배대지 예상비용</span>
-                                                        <span className="text-white font-bold">-5,000원</span>
-                                                    </div>
-                                                    <div className="flex justify-between text-xs border-t border-white/5 pt-3">
-                                                        <span className="text-slate-300 font-bold">마진 소계</span>
-                                                        <span className="text-emerald-400 font-black">₩1,359</span>
+                                                    <div className="text-right">
+                                                        <p className="text-[11px] font-bold text-slate-400 uppercase mb-1">마진율</p>
+                                                        <p className="text-xl font-black text-blue-600 tracking-tight">17.9%</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </section>
 
-                                    <section className="space-y-3 max-w-2xl">
-                                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                            판매자 요청사항 (메모)
-                                            <span className="bg-slate-100 text-slate-400 px-2 py-0.5 rounded text-[9px] font-bold">선택사항</span>
-                                        </h4>
+                                    {/* Chinese Seller Memo Section */}
+                                    <section className="space-y-4 max-w-4xl">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1 rounded bg-slate-100">
+                                                <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
+                                            </div>
+                                            <h4 className="text-[13px] font-bold text-slate-700">중국 판매자에게 전달할 요청사항</h4>
+                                        </div>
                                         <div className="relative">
                                             <textarea
-                                                className="w-full h-40 border-2 border-slate-100 rounded-2xl p-5 text-sm focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 resize-none bg-slate-50/50 transition-all placeholder:text-slate-300 font-medium"
-                                                placeholder="구매 시 중국 판매자에게 전달할 요청사항을 입력하세요. (예: 깨지지 않게 포장 부탁드립니다.)"
+                                                className="w-full h-32 border border-slate-200 rounded-xl p-4 text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 resize-none bg-white transition-all placeholder:text-slate-300"
+                                                placeholder="깨끗한 새 제품으로 보내주세요. 꼼꼼한 포장 부탁드립니다."
                                             ></textarea>
-                                            <div className="absolute bottom-4 right-4 text-[10px] font-bold text-slate-300">
-                                                0 / 90 자
+                                            <div className="absolute bottom-3 right-4 text-[11px] text-slate-300 font-medium">
+                                                0 / 90자
                                             </div>
                                         </div>
                                     </section>
-                                </div>
 
-                                <div className="p-6 border-t border-slate-100 bg-white grid grid-cols-2 gap-4 shrink-0">
-                                    <Button variant="outline" onClick={() => setStep(1)} className="h-12 rounded-2xl font-bold text-slate-500 border-2 border-slate-100 hover:bg-slate-50">이전 단계</Button>
-                                    <Button onClick={handleComplete} className="h-12 bg-[#18181b] hover:bg-zinc-800 text-white font-bold rounded-2xl shadow-xl flex items-center justify-center gap-2">
-                                        <CheckCircle2 className="h-5 w-5" />
-                                        소싱 완료 및 등록하기
-                                    </Button>
+                                    <div className="flex justify-center gap-4 pt-6 max-w-4xl">
+                                        <Button variant="outline" onClick={() => setStep(1)} className="w-64 h-12 rounded-lg font-bold text-slate-600 border-slate-200 hover:bg-slate-50">이전</Button>
+                                        <Button onClick={handleComplete} className="w-64 h-12 bg-zinc-800 hover:bg-zinc-900 text-white font-bold rounded-lg shadow-lg">
+                                            완료
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -408,52 +404,55 @@ export function SourcingSelectionModal({ open, onOpenChange, order, onComplete }
 
                     {/* RIGHT PANEL: Selected Detail & Margin Analysis (Step 1 Selected Only) */}
                     {step === 1 && selectedItem && (
-                        <div className="border-l border-slate-100 flex flex-col bg-white overflow-hidden shadow-2xl">
+                        <div className="border-l border-slate-100 flex flex-col bg-white overflow-hidden">
                             <div className="p-4 border-b border-slate-100 bg-slate-50/30 shrink-0">
                                 <h3 className="text-[12px] font-bold text-slate-800 tracking-tight uppercase">선택된 소싱 상품</h3>
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 space-y-6">
                                 <section className="space-y-4">
-                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-4">
+                                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">소싱 상품</h4>
+                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-4">
                                         <div className="flex gap-4">
-                                            <div className="relative h-20 w-20 rounded-xl border-2 border-white overflow-hidden bg-white shrink-0 shadow-md">
+                                            <div className="relative h-20 w-20 rounded-lg border overflow-hidden bg-white shrink-0">
                                                 <Image src={selectedItem.thumbnail} alt="" fill className="object-cover" />
                                             </div>
-                                            <div className="flex-1 min-w-0 space-y-2">
+                                            <div className="flex-1 min-w-0 space-y-1.5">
                                                 <div className="flex items-center gap-1 justify-between">
-                                                    <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black px-1.5 py-0">MATCHING {selectedItem.matchingRate}%</Badge>
+                                                    <span className="text-blue-500 text-[9px] font-bold">AI 매칭률 {selectedItem.matchingRate}%</span>
                                                     <ExternalLink className="h-3 w-3 text-slate-300" />
                                                 </div>
                                                 <h4 className="text-[11px] font-bold text-slate-900 line-clamp-2 leading-tight">{selectedItem.productName}</h4>
-                                                <div className="text-[10px] text-slate-500 bg-white/50 p-1.5 rounded-lg border border-slate-100/50">
-                                                    <span className="font-bold text-slate-400 block mb-0.5">선택 옵션</span>
+                                                <div className="text-[10px] text-slate-500">
+                                                    <span className="block font-bold text-slate-400 mb-0.5">선택 옵션</span>
                                                     {selectedItem.optionName}
+                                                    <span className="block mt-1">수량: 1개</span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2 text-[10px] pt-4 border-t border-slate-200/50">
-                                            <p className="font-black text-slate-400 uppercase tracking-widest text-[9px] mb-2">비용 상세</p>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-slate-500">상품 금액 (현지 단가)</span>
-                                                <span className="font-mono text-slate-900 font-bold">¥{selectedItem.sourcingPriceCNY} (₩{selectedItem.sourcingPriceKRW.toLocaleString()})</span>
+                                        <div className="space-y-2 text-[11px] pt-3 border-t border-slate-200/60">
+                                            <p className="font-bold text-slate-400 text-[10px] mb-1">비용 구성</p>
+                                            <div className="flex justify-between items-center text-slate-400">
+                                                <span>상품 금액 (최대 할인 적용 시)</span>
+                                                <span className="text-slate-900 font-bold">₩{selectedItem.sourcingPriceKRW.toLocaleString()} (¥{selectedItem.sourcingPriceCNY})</span>
                                             </div>
                                             <div className="flex justify-between items-center text-slate-400">
-                                                <span className="flex items-center gap-1">소싱처 이용료 <Info className="h-2.5 w-2.5" /></span>
-                                                <span className="font-mono">₩{selectedItem.sourcingFeeKRW}</span>
+                                                <span className="flex items-center gap-1 cursor-help">소싱처 이용료 <Info className="h-2.5 w-2.5" /></span>
+                                                <span className="text-slate-900 font-bold">₩{selectedItem.sourcingFeeKRW || 35}</span>
                                             </div>
                                             <div className="flex justify-between items-center text-slate-400">
-                                                <span className="flex items-center gap-1">통화 환전 수수료 <Info className="h-2.5 w-2.5" /></span>
-                                                <span className="font-mono">₩{selectedItem.exchangeRatefee}</span>
+                                                <span className="flex items-center gap-1 cursor-help">통화 환전 수수료 <Info className="h-2.5 w-2.5" /></span>
+                                                <span className="text-slate-900 font-bold">₩{selectedItem.exchangeRatefee || 31}</span>
                                             </div>
                                             <div className="flex justify-between items-center text-slate-400">
                                                 <span>중국내 배송비</span>
-                                                <span className="font-mono">₩933 (¥4.5)</span>
+                                                <span className="text-slate-900 font-bold">₩933 (¥4.50)</span>
                                             </div>
-                                            <div className="flex justify-between pt-2 border-t border-slate-200 mt-2">
-                                                <span className="font-bold text-slate-900">소싱 총비용</span>
-                                                <span className="font-black text-slate-900">
-                                                    ₩{((selectedItem.sourcingPriceKRW * order.product.quantity) + selectedItem.sourcingFeeKRW + selectedItem.exchangeRatefee + 933).toLocaleString()}
+                                            <Separator className="my-1 bg-slate-200" />
+                                            <div className="flex justify-between items-center pt-1">
+                                                <span className="font-bold text-slate-900 text-[12px]">소싱 총비용</span>
+                                                <span className="font-black text-slate-900 text-[13px]">
+                                                    ₩{((selectedItem.sourcingPriceKRW * order.product.quantity) + (selectedItem.sourcingFeeKRW || 35) + (selectedItem.exchangeRatefee || 31) + 933).toLocaleString()}
                                                 </span>
                                             </div>
                                         </div>
@@ -461,48 +460,56 @@ export function SourcingSelectionModal({ open, onOpenChange, order, onComplete }
                                 </section>
 
                                 <section className="space-y-4">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">실시간 마진 시뮬레이션</h4>
-                                    <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-5 text-white shadow-lg space-y-4">
+                                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">마진 분석</h4>
+                                    <div className="bg-white border border-slate-100 rounded-xl p-4 space-y-4 shadow-sm">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">예상 마진율</span>
-                                            <Badge className="bg-emerald-500 text-white border-0 text-[9px]">수익성 확보</Badge>
+                                            <span className="text-[12px] text-slate-500">정산예상금액</span>
+                                            <span className="font-bold text-slate-900">₩{order.expectedSettlement.toLocaleString()}</span>
                                         </div>
-                                        <div className="space-y-1.5">
-                                            <div className="flex justify-between items-end">
-                                                <span className="text-3xl font-black tracking-tight">17.9%</span>
-                                                <span className="text-[11px] font-bold text-emerald-400">+₩1,359</span>
+                                        <Separator className="bg-slate-100" />
+                                        <div className="space-y-2 text-[11px]">
+                                            <div className="flex justify-between text-slate-400">
+                                                <span>- 상품 금액 (최대 할인 적용 시)</span>
+                                                <span>-₩{selectedItem.sourcingPriceKRW.toLocaleString()}</span>
                                             </div>
-                                            <div className="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden">
-                                                <div className="bg-emerald-500 h-full w-[17.9%]"></div>
+                                            <div className="flex justify-between text-slate-400">
+                                                <span>- 소싱처 이용료</span>
+                                                <span>-₩{selectedItem.sourcingFeeKRW || 35}</span>
+                                            </div>
+                                            <div className="flex justify-between text-slate-400">
+                                                <span>- 통화 환전 수수료</span>
+                                                <span>-₩{selectedItem.exchangeRatefee || 31}</span>
+                                            </div>
+                                            <div className="flex justify-between text-slate-400">
+                                                <span>- 중국내 배송비</span>
+                                                <span>-₩933</span>
+                                            </div>
+                                            <div className="flex justify-between text-slate-400">
+                                                <span>- 배송대행지 운임료 (예상)</span>
+                                                <span>-₩{(5000 + Math.max(0, (selectedItem.estimatedWeight || 0.2) - 0.2) * 5000).toLocaleString()}</span>
                                             </div>
                                         </div>
-                                        <div className="pt-3 border-t border-slate-700 space-y-1.5 text-[10px] text-slate-400">
-                                            <div className="flex justify-between">
-                                                <span>정산 예정</span>
-                                                <span className="text-white font-bold">{order.expectedSettlement.toLocaleString()}원</span>
+                                        <div className="pt-3 border-t border-slate-100 mt-2 space-y-1">
+                                            <div className="flex justify-between items-center text-[13px]">
+                                                <span className="font-bold text-slate-800">예상 순이익</span>
+                                                <span className="font-black text-slate-900">₩1,359</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span>매입가 총액</span>
-                                                <span>-{((selectedItem.sourcingPriceKRW * order.product.quantity) + selectedItem.sourcingFeeKRW + selectedItem.exchangeRatefee + 933).toLocaleString()}원</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span>배대지 비용 (예상)</span>
-                                                <span>-5,000원</span>
+                                            <div className="flex justify-between items-center text-[12px]">
+                                                <span className="text-slate-500">마진율</span>
+                                                <span className="font-bold text-blue-600">17.9%</span>
                                             </div>
                                         </div>
                                     </div>
                                 </section>
                             </div>
 
-                            <div className="p-4 border-t border-slate-100 bg-white grid grid-cols-1 gap-2 shrink-0">
+                            <div className="p-4 border-t border-slate-100 bg-white shrink-0">
                                 <Button
                                     onClick={handleNext}
-                                    className="h-12 bg-[#18181b] hover:bg-zinc-800 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2"
+                                    className="w-full h-12 bg-zinc-800 hover:bg-zinc-900 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2"
                                 >
                                     다음 단계
-                                    <ArrowRight className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" onClick={() => onOpenChange(false)} className="h-10 text-slate-400 font-bold">취소</Button>
                             </div>
                         </div>
                     )}

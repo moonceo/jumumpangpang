@@ -56,6 +56,26 @@ export default function NewOrdersPage() {
         setPcccModalOpen(true);
     };
 
+    const handleApplySourcing = (orderId: string, sourcingId: string, weight: number, sourcingPrice: number) => {
+        setFilteredOrders(prev => prev.map(o => {
+            if (o.id === orderId) {
+                return {
+                    ...o,
+                    warehouse: {
+                        ...o.warehouse,
+                        status: "소싱상품 선택됨",
+                        weight: weight,
+                        shippingCost: sourcingPrice // Store sourcing price here for lack of better field in mock
+                    }
+                };
+            }
+            return o;
+        }));
+        import("sonner").then(({ toast }) => {
+            toast.success("소싱 정보와 무게가 반영되었습니다.");
+        });
+    };
+
     const handleOrderHistory = (order: Order) => {
         setSelectedOrder(order);
         setHistoryModalOpen(true);
@@ -231,6 +251,8 @@ export default function NewOrdersPage() {
                         open={marginModalOpen}
                         onOpenChange={setMarginModalOpen}
                         order={selectedOrder}
+                        onApply={handleApplySourcing}
+                        onCancel={handleCancel}
                     />
                     <ConfirmOrderModal
                         open={confirmModalOpen}

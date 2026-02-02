@@ -45,7 +45,7 @@ export function WarehouseModal({ order, open, onOpenChange }: WarehouseModalProp
                         <div className="space-y-1">
                             <DialogTitle className="text-xl flex items-center gap-2">
                                 <Package className="h-5 w-5 text-orange-400" />
-                                배송대행지 관리 (Refundy Logistics)
+                                배송대행지 관리 (Jumumpangpang Logistics)
                             </DialogTitle>
                             <DialogDescription className="text-zinc-400 text-xs">
                                 마켓 주문번호: <span className="font-bold text-white">{order.marketOrderId}</span> | 화물관리번호: <span className="text-blue-400">24-YZB4477000201</span>
@@ -197,7 +197,7 @@ export function WarehouseModal({ order, open, onOpenChange }: WarehouseModalProp
                         <div className="p-4 border-b bg-white">
                             <h3 className="font-bold text-sm flex items-center gap-2">
                                 <MessageSquare className="h-4 w-4 text-blue-500" />
-                                리펀디 물류 1:1 상담
+                                주문팡팡 물류 1:1 상담
                                 <Badge className="ml-auto bg-green-500 animate-pulse h-2 w-2 rounded-full p-0" />
                             </h3>
                         </div>

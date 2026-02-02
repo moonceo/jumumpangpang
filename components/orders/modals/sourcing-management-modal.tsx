@@ -40,7 +40,7 @@ export function SourcingManagementModal({ order, open, onOpenChange }: SourcingM
                         소싱 주문 관리
                     </DialogTitle>
                     <DialogDescription className="text-zinc-400 text-xs">
-                        마켓 주문번호: <span className="font-bold text-white">{order.marketOrderId}</span> | 리펀디 AI 소싱 시스템 연동 중
+                        마켓 주문번호: <span className="font-bold text-white">{order.marketOrderId}</span> | 주문팡팡 AI 소싱 시스템 연동 중
                     </DialogDescription>
                 </DialogHeader>
 

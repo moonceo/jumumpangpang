@@ -29,7 +29,7 @@ export function OrderHistoryModal({ order, open, onOpenChange }: OrderHistoryMod
     // Mock timeline events based on benchmark
     const events = [
         {
-            actor: "리펀디 AI",
+            actor: "주문팡팡 AI",
             time: "약 3시간 전",
             title: "통관부호 입력 링크 생성",
             details: [
@@ -38,7 +38,7 @@ export function OrderHistoryModal({ order, open, onOpenChange }: OrderHistoryMod
             type: "system"
         },
         {
-            actor: "리펀디 AI",
+            actor: "주문팡팡 AI",
             time: "약 3시간 전",
             title: "주문 수집 완료",
             details: [

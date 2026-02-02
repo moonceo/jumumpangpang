@@ -36,10 +36,10 @@ export function AddSourcingModal({ open, onOpenChange, order }: AddSourcingModal
                                 AI 소싱 발주 대시보드
                             </DialogTitle>
                             <DialogDescription className="text-zinc-400 text-xs">
-                                주문 <span className="font-bold text-white">#{order.marketOrderId}</span> | 리펀디 AI 소싱 엔진이 최적의 공급처를 추천합니다.
+                                주문 <span className="font-bold text-white">#{order.marketOrderId}</span> | 주문팡팡 AI 소싱 엔진이 최적의 공급처를 추천합니다.
                             </DialogDescription>
                         </div>
-                        <Badge className="bg-blue-600 px-3 py-1 text-[10px] font-black italic">Refundy AI Engine v2.0</Badge>
+                        <Badge className="bg-blue-600 px-3 py-1 text-[10px] font-black italic">Jumumpangpang AI Engine v2.0</Badge>
                     </div>
                 </DialogHeader>
 

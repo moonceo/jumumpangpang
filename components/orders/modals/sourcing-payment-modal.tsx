@@ -477,12 +477,12 @@ export function SourcingPaymentModal({ open, onOpenChange, order, onComplete, on
                                 <h4 className="font-bold text-slate-800">예상 배송대행지 비용</h4>
                                 <div className="flex justify-between text-slate-600">
                                     <span>기본 비용 ({weight} kg)</span>
-                                    <span>{(5000 + Math.max(0, parseFloat(weight) - 0.1) * 2000).toLocaleString()} 원</span>
+                                    <span>{(5000 + Math.max(0, parseFloat(weight) - 0.2) * 5000).toLocaleString()} 원</span>
                                 </div>
                                 <Separator className="bg-slate-200" />
                                 <div className="flex justify-between font-bold text-slate-900 pt-1">
                                     <span>총 예상 비용</span>
-                                    <span>{(5000 + Math.max(0, parseFloat(weight) - 0.1) * 2000).toLocaleString()} 원</span>
+                                    <span>{(5000 + Math.max(0, parseFloat(weight) - 0.2) * 5000).toLocaleString()} 원</span>
                                 </div>
                             </div>
 
@@ -523,10 +523,10 @@ export function SourcingPaymentModal({ open, onOpenChange, order, onComplete, on
                                     </div>
                                     <div className="text-right">
                                         <div className="text-[14px] font-bold text-slate-900">
-                                            ₩{(order.expectedSettlement - (confirmed.sourcingPriceKRW * order.product.quantity) - (confirmed.sourcingFeeKRW || 35) - (confirmed.exchangeRatefee || 31) - Math.round((confirmed.localShippingFeeCNY || 0) * 190.4) - (5000 + Math.max(0, parseFloat(weight) - 0.1) * 2000)).toLocaleString()}
+                                            ₩{(order.expectedSettlement - (confirmed.sourcingPriceKRW * order.product.quantity) - (confirmed.sourcingFeeKRW || 35) - (confirmed.exchangeRatefee || 31) - Math.round((confirmed.localShippingFeeCNY || 0) * 190.4) - (5000 + Math.max(0, parseFloat(weight) - 0.2) * 5000)).toLocaleString()}
                                         </div>
                                         <div className="text-[12px] font-bold text-slate-900">
-                                            {(((order.expectedSettlement - (confirmed.sourcingPriceKRW * order.product.quantity) - (confirmed.sourcingFeeKRW || 35) - (confirmed.exchangeRatefee || 31) - Math.round((confirmed.localShippingFeeCNY || 0) * 190.4) - (5000 + Math.max(0, parseFloat(weight) - 0.1) * 2000)) / order.paymentPrice) * 100).toFixed(1)}%
+                                            {(((order.expectedSettlement - (confirmed.sourcingPriceKRW * order.product.quantity) - (confirmed.sourcingFeeKRW || 35) - (confirmed.exchangeRatefee || 31) - Math.round((confirmed.localShippingFeeCNY || 0) * 190.4) - (5000 + Math.max(0, parseFloat(weight) - 0.2) * 5000)) / order.paymentPrice) * 100).toFixed(1)}%
                                         </div>
                                     </div>
                                 </div>

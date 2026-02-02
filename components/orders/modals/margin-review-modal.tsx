@@ -36,12 +36,15 @@ interface MarginReviewModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     order: Order | null;
+    onApply?: (orderId: string, sourcingId: string, weight: number, sourcingPrice: number) => void;
+    onCancel?: (order: Order) => void;
 }
 
 import { useState, useMemo } from "react";
 
-export function MarginReviewModal({ open, onOpenChange, order }: MarginReviewModalProps) {
+export function MarginReviewModal({ open, onOpenChange, order, onApply, onCancel }: MarginReviewModalProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [weight, setWeight] = useState<string>("0.20");
 
     if (!order) return null;
 
@@ -80,6 +83,20 @@ export function MarginReviewModal({ open, onOpenChange, order }: MarginReviewMod
         recommendations.find(r => r.id === selectedId) || null
         , [selectedId, recommendations]);
 
+    const estimatedShippingCost = useMemo(() => {
+        const w = parseFloat(weight) || 0;
+        // Formula: Basic 5,000 KRW + weight-based additional (simplified for demo)
+        return 5000 + Math.max(0, w - 0.2) * 5000;
+    }, [weight]);
+
+    const handleApply = () => {
+        if (order && selectedId) {
+            const sourcingPrice = selectedRecommendation ? selectedRecommendation.priceKRW + (selectedRecommendation.shippingCNY * 190) : 0;
+            onApply?.(order.id, selectedId, parseFloat(weight) || 0.2, sourcingPrice);
+            onOpenChange(false);
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[1400px] p-0 overflow-hidden border-none shadow-2xl h-[90vh] max-h-[900px] flex flex-col">
@@ -91,10 +108,9 @@ export function MarginReviewModal({ open, onOpenChange, order }: MarginReviewMod
                                 AI 마진 검토 대시보드
                             </DialogTitle>
                             <DialogDescription className="text-zinc-400 text-xs">
-                                주문 <span className="font-bold text-white">#{order.marketOrderId}</span> | 리펀디 AI 시스템이 최적의 수익성을 시뮬레이션합니다.
+                                주문 <span className="font-bold text-white">#{order.marketOrderId}</span> | 주문팡팡 AI 시스템이 최적의 수익성을 시뮬레이션합니다.
                             </DialogDescription>
                         </div>
-                        <Badge className="bg-blue-600 px-3 py-1 text-[10px] font-black italic">Refundy AI Engine v2.0</Badge>
                     </div>
                 </DialogHeader>
 
@@ -242,6 +258,24 @@ export function MarginReviewModal({ open, onOpenChange, order }: MarginReviewMod
                             {selectedId ? (
                                 <>
                                     <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                                        <div className="mb-4">
+                                            <label className="text-[10px] font-bold text-slate-500 mb-1.5 block">배송비 계산용 예상치</label>
+                                            <div className="space-y-1">
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">무게 (kg) <span className="text-red-500">*</span></span>
+                                                    <Input
+                                                        type="number"
+                                                        value={weight}
+                                                        onChange={(e) => setWeight(e.target.value)}
+                                                        className="pl-20 h-9 text-[12px] font-bold border-slate-200 focus-visible:ring-blue-500"
+                                                    />
+                                                </div>
+                                                <p className="text-[9px] text-zinc-400">AI 예측: 0.20 kg</p>
+                                            </div>
+                                        </div>
+
+                                        <Separator className="bg-slate-200/50 mb-4" />
+
                                         <div className="flex gap-3 mb-3">
                                             <div className="relative h-14 w-14 rounded border border-slate-200 overflow-hidden bg-white shrink-0">
                                                 <Image src={selectedRecommendation?.thumbnail || order.product.thumbnail} alt="Selected" fill className="object-cover" />
@@ -282,8 +316,8 @@ export function MarginReviewModal({ open, onOpenChange, order }: MarginReviewMod
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-end">
-                                                <span className="text-3xl font-black tracking-tight">61.9%</span>
-                                                <span className="text-sm font-bold text-emerald-400">+₩{(selectedRecommendation ? order.expectedSettlement - (selectedRecommendation.priceKRW + (selectedRecommendation.shippingCNY * 190)) - 5000 : 0).toLocaleString()}</span>
+                                                <span className="text-3xl font-black tracking-tight">{(((order.expectedSettlement - (selectedRecommendation ? selectedRecommendation.priceKRW + (selectedRecommendation.shippingCNY * 190) : 0) - estimatedShippingCost) / order.paymentPrice) * 100).toFixed(1)}%</span>
+                                                <span className="text-sm font-bold text-emerald-400">+₩{(selectedRecommendation ? order.expectedSettlement - (selectedRecommendation.priceKRW + (selectedRecommendation.shippingCNY * 190)) - estimatedShippingCost : 0).toLocaleString()}</span>
                                             </div>
                                             <div className="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden">
                                                 <div className="bg-emerald-500 h-full w-[61.9%]"></div>
@@ -300,7 +334,7 @@ export function MarginReviewModal({ open, onOpenChange, order }: MarginReviewMod
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>배대지 예상비용</span>
-                                                <span>-5,000원</span>
+                                                <span>-{estimatedShippingCost.toLocaleString()}원</span>
                                             </div>
                                         </div>
                                     </div>
@@ -314,11 +348,26 @@ export function MarginReviewModal({ open, onOpenChange, order }: MarginReviewMod
 
                         {/* Right Column Footer */}
                         <div className="p-4 border-t border-slate-100 space-y-2 bg-slate-50/30">
-                            <Button className="w-full bg-[#18181b] hover:bg-zinc-800 text-white font-bold h-11 rounded-lg shadow-lg flex items-center justify-center gap-2">
+                            <Button
+                                onClick={handleApply}
+                                disabled={!selectedId}
+                                className="w-full bg-[#18181b] hover:bg-zinc-800 text-white font-bold h-11 rounded-lg shadow-lg flex items-center justify-center gap-2"
+                            >
                                 <CheckCircle2 className="h-4 w-4" />
-                                소싱 반영하기
+                                소싱확인
                             </Button>
-                            <Button variant="ghost" onClick={() => onOpenChange(false)} className="w-full h-10 text-slate-400 font-bold">닫기</Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => {
+                                    if (order && onCancel) {
+                                        onCancel(order);
+                                    }
+                                    onOpenChange(false);
+                                }}
+                                className="w-full h-10 text-slate-400 font-bold"
+                            >
+                                주문취소
+                            </Button>
                         </div>
                     </div>
                 </div>
